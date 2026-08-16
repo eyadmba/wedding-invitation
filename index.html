@@ -246,15 +246,20 @@
      but below the falling-leaves canvas/content (1/2). ---- */
   .bg-image{
     position: fixed;
-    /* top/left/right pinned at 0 and bottom pushed past the edge by the
-       drift buffer -- computed as position offsets against the live
-       viewport every frame, rather than a `height: 100% + Npx` that
-       resolves against a fixed viewport-size snapshot (the "large"
-       viewport, i.e. as if the address bar were permanently hidden) and
-       so falls short of the real, currently-visible area while the address
-       bar animates during scroll. */
+    /* height pinned to 100svh (+ the drift buffer), NOT sized against the
+       live viewport (e.g. `bottom: calc(-1 * var(--bg-drift-max))` against
+       top/left/right:0, or 100dvh) -- this box feeds `background-size:
+       cover`, so as soon as its height changes, the browser recomputes how
+       much of the photo to crop/zoom to cover it. With a live-viewport
+       height, the address bar hiding mid-scroll grows the box and the photo
+       visibly snaps to a different crop the instant the bars commit --
+       that's the "skip" being reported, not the translateY drift below.
+       100svh never changes during that animation (same reasoning as the
+       .page min-height comment, search "svh"), so the crop stays put; the
+       only cost is the same one already accepted there -- a sliver of
+       unused space at the very bottom once the bars actually do hide. */
     top: 0; left: 0; right: 0;
-    bottom: calc(-1 * var(--bg-drift-max));
+    height: calc(100svh + var(--bg-drift-max));
     z-index: -1;
     background-image: var(--bg-image, none);
     background-size: cover;
