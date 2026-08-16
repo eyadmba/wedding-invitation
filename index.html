@@ -199,12 +199,21 @@
   html,body{
     margin:0; padding:0;
     color: var(--ink);
+  }
+  html{
     /* safety net for mobile: the fixed background layers below track the
        *live* viewport, but browsers can lag a frame behind while their
        address bar animates in/out during scroll, briefly exposing the
        plain document background right at that edge -- matching it to the
        backdrop's own color instead of leaving it default white means that
-       sliver is unnoticeable instead of a flash of white. */
+       sliver is unnoticeable instead of a flash of white.
+       Deliberately only on <html>, not <body>: body is a plain in-flow
+       box (no stacking context of its own), so its own background paints
+       *above* any negative-z-index descendant of the root in CSS's
+       painting order -- giving body this color was blotting out
+       .bg-image/.bg-fixed (both negative z-index) completely. html *is*
+       the root stacking context, so its background safely paints at the
+       very bottom, under those layers, right where a fallback belongs. */
     background: var(--sky-deepest);
   }
 
