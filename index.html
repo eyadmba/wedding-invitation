@@ -55,7 +55,7 @@
 
     --text-shadow-intensity: 0; /* 0 = no shadow (default); design-lab slider */
 
-    --ornament-mark-rotate: 45deg; /* the ornament's center glyph -- 45deg turns the default ◆ into a square */
+    --ornament-mark-rotate: 0deg; /* the ornament's center glyph; only "square" needs 45deg (see ORNAMENT_MARKS) */
   }
 
   *{ box-sizing: border-box; }
@@ -473,8 +473,14 @@
        shorter than the real, fully-scrolled viewport and there's no unused
        gap once the bars actually do hide. The only tradeoff is the mirror
        image of svh's: on first load, with bars still shown, a section can
-       run a little taller than what's currently visible. */
-    min-height: 100lvh;
+       run a little taller than what's currently visible.
+       Capped with min() at 900px so this doesn't keep growing on very tall
+       viewports (a big desktop window, an external monitor) -- past that
+       point each section is mostly empty space between short content
+       blocks, which just means more scrolling to get through the page for
+       no benefit. min() still resolves to a static, non-animating value
+       either way, so this doesn't reopen the address-bar jump. */
+    min-height: min(100lvh, 900px);
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -512,6 +518,15 @@
   #hero{
     padding-left: 14px;
     padding-right: 14px;
+    /* svh, not the shared .page lvh: .footer-info is pinned near the
+       *bottom* of this section's box, and lvh assumes the address bar is
+       already hidden -- on first load, with the bar still shown, the real
+       visible area is smaller than that, so the footer sat below the fold
+       until you scrolled. svh is the guaranteed-visible size regardless of
+       bar state (the opposite extreme from lvh, equally pinned/non-
+       animating -- see the .page comment), so if the hero fits within it,
+       it's on-screen immediately. */
+    min-height: min(100svh, 900px);
   }
 
   .ornament{
@@ -529,10 +544,11 @@
   }
   .ornament .mark{
     font-size: 1rem;
-    /* the glyph itself (◆, ●, ✦, ...) is swapped via JS/the design lab --
-       this rotation is what turns the default ◆ into an upright square;
-       other shapes reset it to 0deg (see ORNAMENT_MARKS in the script). */
-    transform: rotate(var(--ornament-mark-rotate, 45deg));
+    /* the glyph itself (✦ by default, or ◆/●/+/none) is swapped via JS/the
+       design lab -- only "square" needs this rotated (it's the ◆ glyph
+       turned 45deg to sit upright); every other shape, including the
+       default star, keeps this at 0deg (see ORNAMENT_MARKS in the script). */
+    transform: rotate(var(--ornament-mark-rotate, 0deg));
     color: var(--gold);
   }
 
@@ -1175,10 +1191,10 @@
     <summary>Ornament</summary>
     <label>Center mark
       <select id="ornamentMarkPicker">
-        <option value="square" selected>Square</option>
+        <option value="square">Square</option>
         <option value="diamond">Diamond</option>
         <option value="circle">Circle</option>
-        <option value="star">Star</option>
+        <option value="star" selected>Star</option>
         <option value="plus">Plus</option>
         <option value="none">None</option>
       </select>
@@ -1247,7 +1263,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
@@ -1271,7 +1287,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
@@ -1291,7 +1307,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
@@ -1318,7 +1334,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
@@ -1333,7 +1349,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
@@ -1358,7 +1374,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
@@ -1373,7 +1389,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
@@ -1395,7 +1411,7 @@
 
         <div class="ornament">
           <span class="line"></span>
-          <span class="mark">◆</span>
+          <span class="mark">✦</span>
           <span class="line"></span>
         </div>
 
