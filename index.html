@@ -422,7 +422,16 @@
 
   .page{
     position:relative;
-    min-height: 100dvh;
+    /* svh (small viewport height), not dvh: dvh tracks the *current* browser
+       chrome state, so it changes value live as the address bar animates
+       in/out -- meaning every section's height, and so the whole page's
+       scrollable length, would shift under you at the exact moment you lift
+       your finger and the bars commit to hiding, producing precisely the
+       "skip" being reported here. svh pins to the smallest possible
+       viewport (bars always assumed visible) so section heights are stable
+       no matter what the chrome is doing; the only cost is a bit of unused
+       space at the bottom of a section once the bars actually do hide. */
+    min-height: 100svh;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -1210,7 +1219,7 @@
        `name` is the full fragment that goes right after "دعوة", e.g.
        "للسيد عادل" renders as "دعوة للسيد عادل". */
     const GUESTS = {
-      '00v8': { name: 'دعوة للسيد', seats: 10 }, // guest 1
+      '00v8': { name: 'للسيد عادل القاسم', seats: 10 }, // guest 1
       '05g1': { name: '', seats: 2 }, // guest 2
       '0jpk': { name: '', seats: 2 }, // guest 3
       '0o2r': { name: '', seats: 2 }, // guest 4
