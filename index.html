@@ -33,6 +33,35 @@
     --gold: #a3813f;
     --gold-deep: #8a6a30;
     --hairline: rgba(90,70,40,0.28);
+
+    /* ---- per-role text colors: everything below used to just reuse --ink /
+       --ink-soft / --gold-deep, which meant e.g. "make the fathers' names
+       gold" also silently recolored the location-card times. Each role here
+       gets its own independent var (all default to whatever color it used
+       to inherit, so nothing changes visually until one is tweaked in the
+       design lab) so every text element can be classified and colored on
+       its own. ---- */
+    --names-color: #3a2f27;       /* bride & groom names in the hero */
+    --fathers-color: #8a6a30;     /* the two fathers' names in the hero */
+    --hero-secondary: #5c4d3f;    /* hero's "يتشرف كل من" / "بدعوتكم" lines */
+    --footer-color: #5c4d3f;      /* hero's bottom-of-screen seat-count notice */
+
+    --timeline-title-color: #3a2f27;
+    --timeline-primary: #8a6a30;    /* the time, e.g. ٧:٠٠ مساءً */
+    --timeline-secondary: #5c4d3f;  /* the label underneath, e.g. الوصول */
+
+    --location-title-color: #3a2f27;
+    --location-primary: #3a2f27;    /* the venue name, e.g. بيت العروس */
+    --location-secondary: #8a6a30;  /* the time beside it */
+
+    --rsvp-title-color: #3a2f27;
+    --rsvp-primary: #5c4d3f;    /* the question ("يسعدنا تأكيد حضوركم...") */
+    --rsvp-secondary: #3a2f27;  /* the yes/no answer text */
+
+    --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
+    --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
+
+    --text-shadow-intensity: 0; /* 0 = no shadow (default); design-lab slider */
   }
 
   *{ box-sizing: border-box; }
@@ -423,8 +452,18 @@
     z-index: 2;
     max-width: 640px;
     margin: 0 auto;
-    border-left: 1px solid var(--hairline);
-    border-right: 1px solid var(--hairline);
+    /* design-lab "text shadow intensity" knob: text-shadow is inherited, so
+       setting it once here reaches every text element in the page instead
+       of repeating it per element. At the default intensity of 0 both the
+       offset and the alpha resolve to 0, i.e. no visible shadow at all --
+       elements with their own literal text-shadow (like .names .name)
+       layer this in as a second, independent shadow rather than replacing
+       it (see that rule). */
+    text-shadow:
+      0
+      calc(var(--text-shadow-intensity) * 0.15px)
+      calc(var(--text-shadow-intensity) * 0.6px)
+      rgba(0, 0, 0, calc(var(--text-shadow-intensity) * 0.045));
   }
 
   .page{
@@ -480,9 +519,6 @@
     padding-left: 14px;
     padding-right: 14px;
   }
-  .page + .page{
-    border-top: 1px solid var(--hairline);
-  }
 
   .ornament{
     display:flex;
@@ -503,12 +539,18 @@
     color: var(--gold);
   }
 
+  /* shared across all three later sections -- color is deliberately NOT set
+     here; each section's title gets its own classification/var below (per
+     the design lab), so recoloring one section's title never touches the
+     others even though they share this base rule for layout. */
   .section-title{
     margin:0;
     font-family: var(--font-display);
     font-size: clamp(1.9rem, 6vw, 2.6rem);
-    color: var(--ink);
   }
+  #timeline-section .section-title{ color: var(--timeline-title-color); }
+  #location-section .section-title{ color: var(--location-title-color); }
+  #rsvp-section .section-title{ color: var(--rsvp-title-color); }
 
   .kicker{
     margin:0;
@@ -518,13 +560,17 @@
     color: var(--gold);
   }
 
+  /* shared between the hero's two intro lines and the rsvp question -- same
+     reasoning as .section-title above, color is scoped per section instead
+     of set here. */
   .lead{
     margin:0;
     font-family: var(--font-body);
     font-size: clamp(1.05rem, 2.6vw, 1.3rem);
-    color: var(--ink-soft);
     letter-spacing: 0.02em;
   }
+  #hero .lead{ color: var(--hero-secondary); }
+  #rsvp-section .lead{ color: var(--rsvp-primary); }
 
   .row{
     width:100%;
@@ -541,7 +587,7 @@
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(0.82rem, 4.4vw, 1.55rem);
-    color: var(--gold-deep);
+    color: var(--fathers-color);
     line-height:1.35;
     white-space: nowrap;
   }
@@ -559,8 +605,17 @@
     font-weight:700;
     font-size: clamp(2.6rem, 10vw, 4.6rem);
     line-height:1;
-    color: var(--ink);
-    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    color: var(--names-color);
+    /* two stacked shadows, not one: the fixed highlight below is this
+       element's own look (unrelated to the design-lab intensity knob) --
+       layering the .wrap intensity shadow alongside it, instead of
+       replacing it, keeps that highlight intact at intensity 0. */
+    text-shadow:
+      0 1px 0 rgba(255,255,255,0.5),
+      0
+      calc(var(--text-shadow-intensity) * 0.15px)
+      calc(var(--text-shadow-intensity) * 0.6px)
+      rgba(0, 0, 0, calc(var(--text-shadow-intensity) * 0.045));
   }
   .names .conn{
     font-family: var(--font-body);
@@ -580,7 +635,7 @@
     gap: 10px;
     font-family: var(--font-body);
     font-size: clamp(0.95rem, 3.4vw, 1.1rem);
-    color: var(--ink-soft);
+    color: var(--footer-color);
     letter-spacing: 0.01em;
   }
   .footer-info span{
@@ -599,37 +654,52 @@
     }
   }
 
-  /* ---- timeline section ---- */
+  /* ---- timeline section ----
+     centered vertical line, items alternating left/right of it (odd items
+     to the right, even to the left) instead of one right-aligned column --
+     the old layout only ever used the right half of the section, which on
+     anything wider than a phone left the left half sitting empty. */
   .timeline{
     list-style:none;
     margin:0;
     padding:0;
     width:100%;
-    max-width: 360px;
+    max-width: 480px;
     display:flex;
     flex-direction:column;
     gap: 40px;
     position:relative;
+    /* the page is RTL, but align-self:flex-start/flex-end below resolve
+       against the *container's* direction, not a fixed physical side -- so
+       under RTL they were flipped from what the left/right padding and dot
+       offsets assumed, putting both on the wrong half. Times/labels are
+       still correct RTL Arabic either way (that's per-character bidi, not
+       this property), so pinning this one layout container to ltr just
+       keeps flex-end meaning physical-right, matching everything else below. */
+    direction: ltr;
   }
   .timeline::before{
     content:'';
     position:absolute;
     top:6px;
     bottom:6px;
-    right:8px;
+    left:50%;
     width:2px;
     background: var(--gold);
     opacity:0.45;
+    transform: translateX(-50%);
   }
   .timeline-item{
     position:relative;
-    padding-right: 32px;
-    text-align:right;
+    width: 50%;
   }
+  /* the dot always sits centered on the line -- which side of the item's
+     own box that is depends on which half of the container the item is in,
+     so odd/even each position it on their own inner edge instead of a
+     single shared offset. */
   .timeline-item::before{
     content:'';
     position:absolute;
-    right: 1.5px;
     top: 5px;
     width: 13px;
     height: 13px;
@@ -637,18 +707,34 @@
     background: var(--sky-deep);
     border: 2px solid var(--gold-deep);
   }
+  .timeline-item:nth-child(odd){
+    align-self: flex-end;
+    padding-right: 32px;
+    text-align: right;
+  }
+  .timeline-item:nth-child(odd)::before{
+    left: -6.5px;
+  }
+  .timeline-item:nth-child(even){
+    align-self: flex-start;
+    padding-left: 32px;
+    text-align: left;
+  }
+  .timeline-item:nth-child(even)::before{
+    right: -6.5px;
+  }
   .timeline-time{
     display:block;
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(1.2rem, 4vw, 1.5rem);
-    color: var(--gold-deep);
+    color: var(--timeline-primary);
   }
   .timeline-label{
     display:block;
     font-family: var(--font-body);
     font-size: clamp(1rem, 3vw, 1.15rem);
-    color: var(--ink-soft);
+    color: var(--timeline-secondary);
     margin-top: 2px;
   }
 
@@ -679,13 +765,13 @@
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(1.1rem, 3.4vw, 1.3rem);
-    color: var(--ink);
+    color: var(--location-primary);
   }
   .location-card .location-time{
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(0.9rem, 2.8vw, 1.05rem);
-    color: var(--gold-deep);
+    color: var(--location-secondary);
     white-space: nowrap;
   }
   .location-card iframe{
@@ -711,7 +797,7 @@
     gap: 10px;
     font-family: var(--font-body);
     font-size: clamp(1rem, 3vw, 1.15rem);
-    color: var(--ink);
+    color: var(--rsvp-secondary);
     border: 1px solid var(--hairline);
     border-radius: 10px;
     padding: 14px 16px;
@@ -723,12 +809,18 @@
     height: 18px;
     accent-color: var(--gold-deep);
   }
+  /* follows --rsvp-primary (the question's color) rather than its own var --
+     "primary" here reads as the section's dominant/emphasis color, so the
+     one action in the section leans on it too. Text stays --sky (the
+     on-accent color used elsewhere) since --rsvp-primary defaults to a dark
+     tone; if it's tuned to something light in the design lab this pairing
+     may need a second look. */
   .rsvp-submit{
     margin-top: 6px;
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(1rem, 3vw, 1.1rem);
-    background: var(--gold-deep);
+    background: var(--rsvp-primary);
     color: var(--sky);
     border:none;
     border-radius: 10px;
@@ -919,28 +1011,127 @@
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Primary text</span>
-      <input type="color" id="inkPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="inkHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="inkPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="inkHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="inkAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Secondary text</span>
-      <input type="color" id="inkSoftPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="inkSoftHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="inkSoftPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="inkSoftHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="inkSoftAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Accent (light)</span>
-      <input type="color" id="goldPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="goldHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="goldPicker" value="#a3813f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="goldHex" value="#a3813f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="goldAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Accent (deep)</span>
-      <input type="color" id="goldDeepPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="goldDeepHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="goldDeepPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="goldDeepHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="goldDeepAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
+   </details>
+
+   <details>
+    <summary>Text colors</summary>
+    <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Apply one color to all text</span>
+      <input type="color" id="applyAllPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <button type="button" id="applyAllBtn" style="padding:4px 8px; font-size:11px; cursor:pointer; border-radius:5px; border:1px solid rgba(0,0,0,0.2); background:#fff;">Apply</button>
+    </label>
+    <details>
+     <summary>Hero</summary>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Bride &amp; groom names</span>
+       <input type="color" id="namesPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="namesHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="namesAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Fathers</span>
+       <input type="color" id="fathersPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="fathersHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="fathersAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Secondary (يتشرف / بدعوتكم)</span>
+       <input type="color" id="heroSecondaryPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="heroSecondaryHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="heroSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Footer notice</span>
+       <input type="color" id="footerPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="footerHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="footerAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+    </details>
+    <details>
+     <summary>Timeline</summary>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Title</span>
+       <input type="color" id="timelineTitlePicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="timelineTitleHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="timelineTitleAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Primary (time)</span>
+       <input type="color" id="timelinePrimaryPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="timelinePrimaryHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="timelinePrimaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Secondary (label)</span>
+       <input type="color" id="timelineSecondaryPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="timelineSecondaryHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="timelineSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+    </details>
+    <details>
+     <summary>Location</summary>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Title</span>
+       <input type="color" id="locationTitlePicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="locationTitleHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="locationTitleAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Primary (venue name)</span>
+       <input type="color" id="locationPrimaryPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="locationPrimaryHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="locationPrimaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Secondary (time)</span>
+       <input type="color" id="locationSecondaryPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="locationSecondaryHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="locationSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+    </details>
+    <details>
+     <summary>RSVP</summary>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Title</span>
+       <input type="color" id="rsvpTitlePicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="rsvpTitleHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="rsvpTitleAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Primary (question)</span>
+       <input type="color" id="rsvpPrimaryPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="rsvpPrimaryHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="rsvpPrimaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+     <label style="justify-content:flex-start; gap:4px;">
+       <span style="flex:1 1 auto; text-align:left;">Secondary (answers)</span>
+       <input type="color" id="rsvpSecondaryPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+       <input type="text" id="rsvpSecondaryHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+       <input type="number" id="rsvpSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+     </label>
+    </details>
    </details>
 
    <details>
@@ -1010,6 +1201,19 @@
    <details>
     <summary>Effects</summary>
     <label>Falling leaves <input type="checkbox" id="petalsToggle" checked></label>
+    <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Leaf color</span>
+      <input type="color" id="leafColorPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="leafColorHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+    </label>
+    <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Petal color</span>
+      <input type="color" id="petalColorPicker" value="#a3813f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="petalColorHex" value="#a3813f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+    </label>
+    <label>Text shadow intensity
+      <input type="range" id="textShadowRange" min="0" max="10" value="0" style="width:105px;">
+    </label>
    </details>
 
    <details>
@@ -1483,8 +1687,8 @@
     // tiny offscreen probes so we can read resolved var(--x) colors as rgb()
     const leafColorProbe = document.createElement('span');
     const petalColorProbe = document.createElement('span');
-    leafColorProbe.style.cssText = 'position:absolute;visibility:hidden;color:var(--gold-deep)';
-    petalColorProbe.style.cssText = 'position:absolute;visibility:hidden;color:var(--gold)';
+    leafColorProbe.style.cssText = 'position:absolute;visibility:hidden;color:var(--leaf-color)';
+    petalColorProbe.style.cssText = 'position:absolute;visibility:hidden;color:var(--petal-color)';
     document.body.append(leafColorProbe, petalColorProbe);
 
     function rgbTuple(el) {
@@ -1644,11 +1848,51 @@
 
     wireColor('bgPicker', 'bgHex', 'bgAlpha', '--bg-color');
     wireColor('starPicker', 'starHex', 'starAlpha', '--star-color');
-    wireColor('inkPicker', 'inkHex', 'inkAlpha', '--ink');
-    wireColor('inkSoftPicker', 'inkSoftHex', 'inkSoftAlpha', '--ink-soft');
-    wireColor('goldPicker', 'goldHex', 'goldAlpha', '--gold');
-    wireColor('goldDeepPicker', 'goldDeepHex', 'goldDeepAlpha', '--gold-deep');
     wireColor('cardColorPicker', 'cardColorHex', null, null); // card color feeds updateCard() instead, below
+    wireColor('leafColorPicker', 'leafColorHex', null, '--leaf-color');
+    wireColor('petalColorPicker', 'petalColorHex', null, '--petal-color');
+
+    /* ---- every text-color role in the page, one row per control: driven
+       from a single list instead of a repeated call per var so the "apply
+       one color to all text" button below can just loop over the same
+       list, instead of maintaining a second hardcoded var name list that
+       could quietly drift out of sync with the controls above. ---- */
+    const TEXT_COLOR_CONTROLS = [
+      { swatch: 'inkPicker', hex: 'inkHex', alpha: 'inkAlpha', cssVar: '--ink' },
+      { swatch: 'inkSoftPicker', hex: 'inkSoftHex', alpha: 'inkSoftAlpha', cssVar: '--ink-soft' },
+      { swatch: 'goldPicker', hex: 'goldHex', alpha: 'goldAlpha', cssVar: '--gold' },
+      { swatch: 'goldDeepPicker', hex: 'goldDeepHex', alpha: 'goldDeepAlpha', cssVar: '--gold-deep' },
+      { swatch: 'namesPicker', hex: 'namesHex', alpha: 'namesAlpha', cssVar: '--names-color' },
+      { swatch: 'fathersPicker', hex: 'fathersHex', alpha: 'fathersAlpha', cssVar: '--fathers-color' },
+      { swatch: 'heroSecondaryPicker', hex: 'heroSecondaryHex', alpha: 'heroSecondaryAlpha', cssVar: '--hero-secondary' },
+      { swatch: 'footerPicker', hex: 'footerHex', alpha: 'footerAlpha', cssVar: '--footer-color' },
+      { swatch: 'timelineTitlePicker', hex: 'timelineTitleHex', alpha: 'timelineTitleAlpha', cssVar: '--timeline-title-color' },
+      { swatch: 'timelinePrimaryPicker', hex: 'timelinePrimaryHex', alpha: 'timelinePrimaryAlpha', cssVar: '--timeline-primary' },
+      { swatch: 'timelineSecondaryPicker', hex: 'timelineSecondaryHex', alpha: 'timelineSecondaryAlpha', cssVar: '--timeline-secondary' },
+      { swatch: 'locationTitlePicker', hex: 'locationTitleHex', alpha: 'locationTitleAlpha', cssVar: '--location-title-color' },
+      { swatch: 'locationPrimaryPicker', hex: 'locationPrimaryHex', alpha: 'locationPrimaryAlpha', cssVar: '--location-primary' },
+      { swatch: 'locationSecondaryPicker', hex: 'locationSecondaryHex', alpha: 'locationSecondaryAlpha', cssVar: '--location-secondary' },
+      { swatch: 'rsvpTitlePicker', hex: 'rsvpTitleHex', alpha: 'rsvpTitleAlpha', cssVar: '--rsvp-title-color' },
+      { swatch: 'rsvpPrimaryPicker', hex: 'rsvpPrimaryHex', alpha: 'rsvpPrimaryAlpha', cssVar: '--rsvp-primary' },
+      { swatch: 'rsvpSecondaryPicker', hex: 'rsvpSecondaryHex', alpha: 'rsvpSecondaryAlpha', cssVar: '--rsvp-secondary' },
+    ];
+    TEXT_COLOR_CONTROLS.forEach(c => wireColor(c.swatch, c.hex, c.alpha, c.cssVar));
+
+    document.getElementById('applyAllBtn').addEventListener('click', () => {
+      const hex = document.getElementById('applyAllPicker').value;
+      const { r, g, b } = hexToRgb(hex);
+      TEXT_COLOR_CONTROLS.forEach(c => {
+        document.getElementById(c.swatch).value = hex;
+        document.getElementById(c.hex).value = hex;
+        const alphaField = document.getElementById(c.alpha);
+        if (alphaField) alphaField.value = 100;
+        document.documentElement.style.setProperty(c.cssVar, `rgba(${r},${g},${b},1)`);
+      });
+    });
+
+    document.getElementById('textShadowRange').addEventListener('input', e => {
+      document.documentElement.style.setProperty('--text-shadow-intensity', e.target.value);
+    });
     document.getElementById('displayFontPicker').addEventListener('change', e => {
       document.documentElement.style.setProperty('--font-display', e.target.value);
     });
