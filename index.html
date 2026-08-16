@@ -246,7 +246,7 @@
      but below the falling-leaves canvas/content (1/2). ---- */
   .bg-image{
     position: fixed;
-    /* height pinned to 100svh (+ the drift buffer), NOT sized against the
+    /* height pinned to 100lvh (+ the drift buffer), NOT sized against the
        live viewport (e.g. `bottom: calc(-1 * var(--bg-drift-max))` against
        top/left/right:0, or 100dvh) -- this box feeds `background-size:
        cover`, so as soon as its height changes, the browser recomputes how
@@ -254,12 +254,14 @@
        height, the address bar hiding mid-scroll grows the box and the photo
        visibly snaps to a different crop the instant the bars commit --
        that's the "skip" being reported, not the translateY drift below.
-       100svh never changes during that animation (same reasoning as the
-       .page min-height comment, search "svh"), so the crop stays put; the
-       only cost is the same one already accepted there -- a sliver of
-       unused space at the very bottom once the bars actually do hide. */
+       lvh is pinned (doesn't animate, same reasoning as the .page
+       min-height comment, search "lvh") *and* it's the large/bars-hidden
+       viewport, so the box is always at least as tall as the real
+       fully-scrolled viewport -- no sliver of unused space at the bottom
+       once the bars actually do hide, unlike svh which undershoots that
+       case by design. */
     top: 0; left: 0; right: 0;
-    height: calc(100svh + var(--bg-drift-max));
+    height: calc(100lvh + var(--bg-drift-max));
     z-index: -1;
     background-image: var(--bg-image, none);
     background-size: cover;
@@ -427,16 +429,19 @@
 
   .page{
     position:relative;
-    /* svh (small viewport height), not dvh: dvh tracks the *current* browser
+    /* lvh (large viewport height), not dvh: dvh tracks the *current* browser
        chrome state, so it changes value live as the address bar animates
        in/out -- meaning every section's height, and so the whole page's
        scrollable length, would shift under you at the exact moment you lift
        your finger and the bars commit to hiding, producing precisely the
-       "skip" being reported here. svh pins to the smallest possible
-       viewport (bars always assumed visible) so section heights are stable
-       no matter what the chrome is doing; the only cost is a bit of unused
-       space at the bottom of a section once the bars actually do hide. */
-    min-height: 100svh;
+       "skip" being reported here. lvh, like svh, is pinned and doesn't
+       animate -- but it's pinned to the *largest* possible viewport (bars
+       assumed hidden) rather than the smallest, so a section is never
+       shorter than the real, fully-scrolled viewport and there's no unused
+       gap once the bars actually do hide. The only tradeoff is the mirror
+       image of svh's: on first load, with bars still shown, a section can
+       run a little taller than what's currently visible. */
+    min-height: 100lvh;
     display:flex;
     flex-direction:column;
     align-items:center;
