@@ -28,8 +28,14 @@
     --s2: color-mix(in srgb, var(--star-color) 62%, transparent);
     --s3: color-mix(in srgb, var(--star-color) 42%, transparent);
 
-    --ink: #3a2f27;
-    --ink-soft: #5c4d3f;
+    /* default palette: nearly-white text with just a hint of sage green
+       for most of the page (--ink and every hero low-level role below),
+       with --ink-soft (the one explicit "secondary" role, and whatever
+       follows it) as the deliberate exception -- a darker, olive-leaning
+       sage, so it still reads as a distinct, secondary tone rather than
+       just a lighter/darker copy of the same color. */
+    --ink: #edf2e4;
+    --ink-soft: #556b2f;
     --gold: #a3813f;
     --gold-deep: #8a6a30;
     --hairline: rgba(90,70,40,0.28);
@@ -42,13 +48,15 @@
        section made of several distinct strings (kicker, two different
        "lead" lines, two fathers, two names, a footer notice) that don't
        reduce to a single primary/secondary pair. Everything else shares
-       --title-color for its section heading. ---- */
-    --title-color: #3a2f27;       /* shared section-title color (all sections) */
-    --kicker-color: #a3813f;      /* hero's "دعوة لمن نحب" line */
-    --names-color: #3a2f27;       /* bride & groom names in the hero */
-    --fathers-color: #8a6a30;     /* the two fathers' names in the hero */
-    --hero-secondary: #5c4d3f;    /* hero's "يتشرف كل من" / "بدعوتكم" lines */
-    --footer-color: #5c4d3f;      /* hero's bottom-of-screen seat-count notice */
+       --title-color for its section heading. All default to the same
+       near-white --ink tone above, not their own colors, per the same
+       "light everywhere, one deliberate dark exception" default. ---- */
+    --title-color: #edf2e4;        /* shared section-title color (all sections) */
+    --kicker-color: #edf2e4;       /* hero's "دعوة لمن نحب" line */
+    --names-color: #edf2e4;        /* bride & groom names in the hero */
+    --fathers-color: #edf2e4;      /* the two fathers' names in the hero */
+    --hero-secondary: #edf2e4;     /* hero's "يتشرف كل من" / "بدعوتكم" lines */
+    --footer-color: #edf2e4;       /* hero's bottom-of-screen seat-count notice */
 
     --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
     --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
@@ -605,11 +613,11 @@
   /* shared between the hero's two intro lines and the rsvp question. The
      hero's own line gets its dedicated --hero-secondary color/scale (it's
      one of the hero's several distinct low-level roles); the rsvp question
-     instead uses the shared --ink-soft color and --text-scale size like
-     every other section. Font-size lives on these scoped rules rather
-     than the shared .lead above so each can carry its own multiplier --
-     the ID selector's specificity wins over .lead regardless of source
-     order. */
+     instead uses the shared --ink "primary" color and --text-scale size --
+     it's the section's primary role, with .rsvp-option's answers below as
+     its secondary. Font-size lives on these scoped rules rather than the
+     shared .lead above so each can carry its own multiplier -- the ID
+     selector's specificity wins over .lead regardless of source order. */
   .lead{
     margin:0;
     font-family: var(--font-body);
@@ -620,7 +628,7 @@
     font-size: calc(var(--hero-secondary-scale, 1) * clamp(1.05rem, 2.6vw, 1.3rem));
   }
   #rsvp-section .lead{
-    color: var(--ink-soft);
+    color: var(--ink);
     font-size: calc(var(--text-scale, 1) * clamp(1.05rem, 2.6vw, 1.3rem));
   }
 
@@ -863,17 +871,19 @@
     height: 18px;
     accent-color: var(--gold-deep);
   }
-  /* follows the shared --ink "primary" color rather than an accent, so it
-     reads as the section's own emphasis color. Text stays --sky (the
-     on-accent color used elsewhere); if --ink is ever tuned to something
-     light in the design lab this pairing may need a second look. */
+  /* background follows the shared --ink "primary" color, text follows
+     --ink-soft "secondary" -- with the default palette (near-white primary,
+     darker olive secondary) that reads as a light button with dark text;
+     if --ink is ever tuned dark and --ink-soft light in the design lab,
+     this pairing flips right along with it since it's the same two vars
+     everywhere else just uses. */
   .rsvp-submit{
     margin-top: 6px;
     font-family: var(--font-body);
     font-weight:700;
     font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.1rem));
     background: var(--ink);
-    color: var(--sky);
+    color: var(--ink-soft);
     border:none;
     border-radius: 10px;
     padding: 14px;
@@ -1063,14 +1073,14 @@
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Primary text</span>
-      <input type="color" id="inkPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="inkHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="inkPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="inkHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="inkAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Secondary text</span>
-      <input type="color" id="inkSoftPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="inkSoftHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="inkSoftPicker" value="#556b2f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="inkSoftHex" value="#556b2f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="inkSoftAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
@@ -1087,7 +1097,7 @@
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Apply one color to all text</span>
-      <input type="color" id="applyAllPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="color" id="applyAllPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
       <button type="button" id="applyAllBtn" style="padding:4px 8px; font-size:11px; cursor:pointer; border-radius:5px; border:1px solid rgba(0,0,0,0.2); background:#fff;">Apply</button>
     </label>
     <!-- Primary/Secondary/Accent above already apply everywhere outside the
@@ -1098,8 +1108,8 @@
          these -- see "Hero text colors" below instead. -->
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Section title (all sections)</span>
-      <input type="color" id="titleColorPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="titleColorHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="titleColorPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="titleColorHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="titleColorAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
    </details>
@@ -1117,32 +1127,32 @@
     <summary>Hero text colors</summary>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Kicker (دعوة لمن نحب)</span>
-      <input type="color" id="kickerPicker" value="#a3813f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="kickerHex" value="#a3813f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="kickerPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="kickerHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="kickerAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Bride &amp; groom names</span>
-      <input type="color" id="namesPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="namesHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="namesPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="namesHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="namesAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Fathers</span>
-      <input type="color" id="fathersPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="fathersHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="fathersPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="fathersHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="fathersAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Secondary (يتشرف / بدعوتكم)</span>
-      <input type="color" id="heroSecondaryPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="heroSecondaryHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="heroSecondaryPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="heroSecondaryHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="heroSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Footer notice</span>
-      <input type="color" id="footerPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="footerHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="footerPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="footerHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="footerAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
    </details>
