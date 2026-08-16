@@ -13,8 +13,7 @@
     --bg-color: #f4efe3;
     --star-color: #8a6a30;
     --bg-image: none;
-    --bg-parallax-travel: 80px;
-    --bg-parallax-offset: 0px;
+    --bg-drift-max: 70px;
 
     --card-bg: rgba(0,0,0,0);
     --card-blur: 0px;
@@ -157,6 +156,49 @@
   }
   #envelope[hidden]{ display: none; }
 
+  /* ---- pre-envelope loader: the envelope's own photo is what actually
+     paints #envelope (its CSS background-images), so on an uncached first
+     visit there's a gap where the page behind it is visible before that
+     photo has finished loading. This sits above the envelope in the same
+     paper tone and hides that gap; the inline script right after it removes
+     the loader the instant both images are ready (synchronously, before
+     first paint, if they're already cached -- so it never flashes at all
+     on a repeat visit). ---- */
+  #loader{
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    background: var(--bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease;
+  }
+  #loader.loader-done{
+    opacity: 0;
+    pointer-events: none;
+  }
+  #loader .loader-track{
+    position: relative;
+    width: 160px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(58,47,39,0.12);
+    overflow: hidden;
+  }
+  #loader .loader-sweep{
+    position: absolute;
+    top:0; bottom:0;
+    width: 40%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    animation: loader-sweep 2s ease-in-out infinite;
+  }
+  @keyframes loader-sweep{
+    0%   { left: -45%; }
+    100% { left: 105%; }
+  }
+
   html,body{
     margin:0; padding:0;
     color: var(--ink);
@@ -182,21 +224,24 @@
   }
 
   /* ---- optional custom background photo/texture, set from the design lab.
-     Sits under the gradient+stars and the falling-leaves canvas (which is
-     z-index:1) so it reads as a backdrop, not an overlay. ---- */
+     Fixed to the viewport (not sized to the whole document) so `cover` only
+     ever has to fill one screen -- stretching it to the full page height
+     would force a huge upscale on most photos and turn them soft/blurry.
+     It's a little taller than the viewport (by --bg-drift-max) purely as a
+     buffer so the small scroll-linked translateY in updateBgImageDrift()
+     never exposes a bottom edge. Sits above .bg-fixed's own starfield (-2)
+     but below the falling-leaves canvas/content (1/2). ---- */
   .bg-image{
-    position:absolute;
-    left:0; right:0; top:0;
-    /* taller than its box by the travel amount, so translating it upward
-       as you scroll never exposes an edge -- it just drifts within the
-       buffer instead of being 100% pinned like a plain fixed background */
-    height: calc(100% + var(--bg-parallax-travel));
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    height: calc(100% + var(--bg-drift-max));
     background-image: var(--bg-image, none);
     background-size: cover;
     background-position: top center;
     background-repeat: no-repeat;
-    transform: translateY(calc(var(--bg-parallax-offset) * -1));
     will-change: transform;
+    pointer-events: none;
   }
 
   .stars{
@@ -698,17 +743,39 @@
     overflow-y: auto;
   }
   #colorLab[hidden]{ display:none; }
-  #colorLab strong{
+  /* ---- collapsible sections: each knob group starts closed so the panel
+     doesn't turn into a wall of controls -- open only what you're tweaking ---- */
+  #colorLab details{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  #colorLab details + details{
+    border-top: 1px solid rgba(0,0,0,0.12);
+    margin-top: 2px;
+    padding-top: 10px;
+  }
+  #colorLab details > *:not(summary){
+    margin-top: 2px;
+  }
+  #colorLab summary{
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #888;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
   }
-  #colorLab hr{
-    width:100%;
-    border:none;
-    border-top: 1px solid rgba(0,0,0,0.12);
-    margin: 2px 0;
+  #colorLab summary::-webkit-details-marker{ display:none; }
+  #colorLab summary::before{
+    content: '▸';
+    display: inline-block;
+    width: 1em;
+    transition: transform 0.15s ease;
+  }
+  #colorLab details[open] summary::before{
+    transform: rotate(90deg);
   }
   #colorLab label{
     display:flex;
@@ -737,6 +804,34 @@
 </head>
 <body>
 
+  <div id="loader"><div class="loader-track"><div class="loader-sweep"></div></div></div>
+  <script>
+    // runs synchronously during parsing, before first paint -- so if these
+    // are already browser-cached, the loader never actually gets shown
+    (function(){
+      const loader = document.getElementById('loader');
+      const sources = ['envelope-no-wax-seal.png', 'seal-overlay.png'];
+      let remaining = sources.length;
+      function hideLoader(){
+        loader.classList.add('loader-done');
+        loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+      }
+      sources.forEach(src => {
+        const img = new Image();
+        let settled = false;
+        const settle = () => {
+          if (settled) return;
+          settled = true;
+          if (--remaining <= 0) hideLoader();
+        };
+        img.onload = settle;
+        img.onerror = settle; // don't get stuck waiting on a failed load
+        img.src = src;
+        if (img.complete) settle();
+      });
+    })();
+  </script>
+
   <!-- envelope intro: two masked copies of static.png, split along the real
        V-crease + the seal's own silhouette. Click anywhere to open. -->
   <div id="envelope">
@@ -750,6 +845,12 @@
 
   <canvas id="petalCanvas"></canvas>
 
+  <!-- viewport-sized custom background photo, with a small scroll-linked
+       drift (see .bg-image / updateBgImageDrift) -- kept fixed and
+       screen-sized rather than stretched over the whole page so `cover`
+       never has to upscale it past its native resolution -->
+  <div class="bg-image"></div>
+
   <div class="bg-fixed">
     <div class="bg-gradient"></div>
     <div class="stars layer-a"></div>
@@ -760,14 +861,14 @@
     <span class="star-accent" style="left:12.2%; top:64.5%; animation-delay:-2.2s;"></span>
     <span class="star-accent" style="left:35.1%; top:33.6%; animation-delay:-0.9s;"></span>
     <span class="star-accent" style="left:80.6%; top:69.3%; animation-delay:-3.6s;"></span>
-    <div class="bg-image"></div>
     <span class="star-accent" style="left:32.4%; top:33.2%; animation-delay:-1.3s;"></span>
   </div>
 
   <!-- experiment-only: delete this button + panel before sharing the real invite -->
   <button id="labToggle" title="Design lab">🎨</button>
   <div id="colorLab" hidden>
-    <strong>Colors</strong>
+   <details>
+    <summary>Colors</summary>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Background</span>
       <input type="color" id="bgPicker" value="#f4efe3" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
@@ -804,10 +905,10 @@
       <input type="text" id="goldDeepHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="goldDeepAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
+   </details>
 
-    <hr>
-
-    <strong>Fonts</strong>
+   <details>
+    <summary>Fonts</summary>
     <label>Display font
       <select id="displayFontPicker">
         <option value="'Almarai', sans-serif">Almarai</option>
@@ -868,15 +969,22 @@
         <option value="'Zain', sans-serif">Zain</option>
       </select>
     </label>
+   </details>
 
-    <hr>
-
-    <strong>Effects</strong>
+   <details>
+    <summary>Effects</summary>
     <label>Falling leaves <input type="checkbox" id="petalsToggle" checked></label>
+   </details>
 
-    <hr>
-
-    <strong>Background image</strong>
+   <details>
+    <summary>Background image</summary>
+    <label>Official background
+      <select id="bgPresetPicker">
+        <option value="">— none —</option>
+        <option value="backgrounds/pin2.jpg">pin2</option>
+        <option value="backgrounds/pintrest1.jpg">pintrest1</option>
+      </select>
+    </label>
     <label style="justify-content:flex-start; gap:6px;">
       <input type="file" id="bgImageInput" accept="image/*" style="max-width:100%;">
     </label>
@@ -885,12 +993,12 @@
     </label>
     <label>Scroll a little <input type="checkbox" id="bgParallaxToggle" checked></label>
     <label>Scroll amount
-      <input type="range" id="bgParallaxRange" min="0" max="200" value="80" style="width:105px;">
+      <input type="range" id="bgParallaxRange" min="0" max="150" value="70" style="width:105px;">
     </label>
+   </details>
 
-    <hr>
-
-    <strong>Section card</strong>
+   <details>
+    <summary>Section card</summary>
     <label>Card background <input type="checkbox" id="cardToggle"></label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Card color</span>
@@ -904,6 +1012,7 @@
     <label>Blur amount
       <input type="range" id="cardBlurRange" min="0" max="40" value="14" style="width:105px;">
     </label>
+   </details>
   </div>
 
   <div class="wrap">
@@ -1509,42 +1618,59 @@
     document.getElementById('bodyFontPicker').addEventListener('change', e => {
       document.documentElement.style.setProperty('--font-body', e.target.value);
     });
-    document.getElementById('bgImageInput').addEventListener('change', e => {
+    const bgPresetPicker = document.getElementById('bgPresetPicker');
+    const bgImageInput = document.getElementById('bgImageInput');
+
+    bgImageInput.addEventListener('change', e => {
       const file = e.target.files[0];
       if (!file) return;
+      bgPresetPicker.value = ''; // uploading a custom photo overrides any preset pick
       const reader = new FileReader();
       reader.onload = () => {
         document.documentElement.style.setProperty('--bg-image', `url('${reader.result}')`);
       };
       reader.readAsDataURL(file);
     });
+    bgPresetPicker.addEventListener('change', e => {
+      bgImageInput.value = '';
+      const path = e.target.value;
+      document.documentElement.style.setProperty('--bg-image', path ? `url('${path}')` : 'none');
+    });
     document.getElementById('bgImageClear').addEventListener('click', () => {
       document.documentElement.style.setProperty('--bg-image', 'none');
-      document.getElementById('bgImageInput').value = '';
+      bgImageInput.value = '';
+      bgPresetPicker.value = '';
     });
 
-    /* ---- background parallax: a little bit of scroll drift, capped ---- */
-    let bgParallaxEnabled = true;
-    let bgParallaxMax = 80; // px, mirrors --bg-parallax-travel
-    const bgParallaxSpeed = 0.25; // fraction of scroll speed
+    /* ---- background photo drift: a small, smooth pan as you scroll, not a
+       crop-to-fit-the-whole-page. The photo stays viewport-sized (crisp,
+       fills the screen like a plain fixed background) and just eases from
+       0 to --bg-drift-max px of translateY over the *entire* scroll range --
+       using the scroll fraction (scrollY / max scrollable distance) rather
+       than raw scrollY means it keeps drifting gently the whole way down,
+       arriving at its max exactly at the bottom of the page, instead of
+       hitting a hard cap early and then sitting dead still. ---- */
+    const bgImageEl = document.querySelector('.bg-image');
+    let bgDriftEnabled = true;
+    let bgDriftMax = 70; // px, mirrors --bg-drift-max
 
-    function updateBgParallax() {
-      const offset = bgParallaxEnabled
-        ? Math.min(window.scrollY * bgParallaxSpeed, bgParallaxMax)
-        : 0;
-      document.documentElement.style.setProperty('--bg-parallax-offset', offset + 'px');
+    function updateBgImageDrift() {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const fraction = bgDriftEnabled && maxScroll > 0 ? window.scrollY / maxScroll : 0;
+      bgImageEl.style.transform = `translateY(${-(fraction * bgDriftMax)}px)`;
     }
-    window.addEventListener('scroll', updateBgParallax, { passive: true });
-    updateBgParallax();
+    window.addEventListener('scroll', updateBgImageDrift, { passive: true });
+    window.addEventListener('resize', updateBgImageDrift);
+    updateBgImageDrift();
 
     document.getElementById('bgParallaxToggle').addEventListener('change', e => {
-      bgParallaxEnabled = e.target.checked;
-      updateBgParallax();
+      bgDriftEnabled = e.target.checked;
+      updateBgImageDrift();
     });
     document.getElementById('bgParallaxRange').addEventListener('input', e => {
-      bgParallaxMax = Number(e.target.value);
-      document.documentElement.style.setProperty('--bg-parallax-travel', bgParallaxMax + 'px');
-      updateBgParallax();
+      bgDriftMax = Number(e.target.value);
+      document.documentElement.style.setProperty('--bg-drift-max', bgDriftMax + 'px');
+      updateBgImageDrift();
     });
 
     /* ---- section card: background color/opacity + optional blur ---- */
