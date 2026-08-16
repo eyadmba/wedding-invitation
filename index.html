@@ -37,9 +37,6 @@
 
   *{ box-sizing: border-box; }
 
-  html{
-    scroll-snap-type: y proximity;
-  }
   html.envelope-locked, html.envelope-locked body{
     overflow: hidden;
     height: 100%;
@@ -202,6 +199,13 @@
   html,body{
     margin:0; padding:0;
     color: var(--ink);
+    /* safety net for mobile: the fixed background layers below track the
+       *live* viewport, but browsers can lag a frame behind while their
+       address bar animates in/out during scroll, briefly exposing the
+       plain document background right at that edge -- matching it to the
+       backdrop's own color instead of leaving it default white means that
+       sliver is unnoticeable instead of a flash of white. */
+    background: var(--sky-deepest);
   }
 
   body{
@@ -233,9 +237,16 @@
      but below the falling-leaves canvas/content (1/2). ---- */
   .bg-image{
     position: fixed;
-    inset: 0;
+    /* top/left/right pinned at 0 and bottom pushed past the edge by the
+       drift buffer -- computed as position offsets against the live
+       viewport every frame, rather than a `height: 100% + Npx` that
+       resolves against a fixed viewport-size snapshot (the "large"
+       viewport, i.e. as if the address bar were permanently hidden) and
+       so falls short of the real, currently-visible area while the address
+       bar animates during scroll. */
+    top: 0; left: 0; right: 0;
+    bottom: calc(-1 * var(--bg-drift-max));
     z-index: -1;
-    height: calc(100% + var(--bg-drift-max));
     background-image: var(--bg-image, none);
     background-size: cover;
     background-position: top center;
@@ -383,10 +394,9 @@
   /* ---- falling leaves canvas (ported from agyIndex.html) ---- */
   #petalCanvas{
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    /* inset:0 (not 100vw/100vh) so it tracks the live viewport rather than
+       a static snapshot -- see the .bg-image comment above for why */
+    inset: 0;
     pointer-events: none;
     z-index: 1;
   }
@@ -411,8 +421,6 @@
     text-align:center;
     padding: 64px 28px;
     gap: 28px;
-    scroll-snap-align: start;
-    scroll-snap-stop: normal;
   }
 
   /* ---- section "card", toggled from the design lab: an actual bounded
@@ -879,30 +887,30 @@
       <span style="flex:1 1 auto; text-align:left;">Stars</span>
       <input type="color" id="starPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
       <input type="text" id="starHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-      <input type="number" id="starAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+      <input type="number" id="starAlpha" value="0" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Primary text</span>
-      <input type="color" id="inkPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="inkHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="inkPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="inkHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="inkAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Secondary text</span>
-      <input type="color" id="inkSoftPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="inkSoftHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="inkSoftPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="inkSoftHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="inkSoftAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Accent (light)</span>
-      <input type="color" id="goldPicker" value="#a3813f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="goldHex" value="#a3813f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="goldPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="goldHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="goldAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Accent (deep)</span>
-      <input type="color" id="goldDeepPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="goldDeepHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="goldDeepPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="goldDeepHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="goldDeepAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
    </details>
@@ -982,7 +990,7 @@
       <select id="bgPresetPicker">
         <option value="">— none —</option>
         <option value="backgrounds/pin2.jpg">pin2</option>
-        <option value="backgrounds/pintrest1.jpg">pintrest1</option>
+        <option value="backgrounds/pintrest1.jpg" selected>pintrest1</option>
       </select>
     </label>
     <label style="justify-content:flex-start; gap:6px;">
@@ -999,14 +1007,14 @@
 
    <details>
     <summary>Section card</summary>
-    <label>Card background <input type="checkbox" id="cardToggle"></label>
+    <label>Card background <input type="checkbox" id="cardToggle" checked></label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Card color</span>
       <input type="color" id="cardColorPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
       <input type="text" id="cardColorHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
     </label>
     <label>Card opacity
-      <input type="range" id="cardAlphaRange" min="0" max="100" value="55" style="width:105px;">
+      <input type="range" id="cardAlphaRange" min="0" max="100" value="20" style="width:105px;">
     </label>
     <label>Card blur <input type="checkbox" id="cardBlurToggle" checked></label>
     <label>Blur amount
@@ -1631,11 +1639,13 @@
       };
       reader.readAsDataURL(file);
     });
-    bgPresetPicker.addEventListener('change', e => {
+    function applyBgPreset() {
       bgImageInput.value = '';
-      const path = e.target.value;
+      const path = bgPresetPicker.value;
       document.documentElement.style.setProperty('--bg-image', path ? `url('${path}')` : 'none');
-    });
+    }
+    bgPresetPicker.addEventListener('change', applyBgPreset);
+    applyBgPreset(); // apply whichever preset is selected by default on load
     document.getElementById('bgImageClear').addEventListener('click', () => {
       document.documentElement.style.setProperty('--bg-image', 'none');
       bgImageInput.value = '';
@@ -1696,6 +1706,7 @@
         el.addEventListener('input', updateCard);
         el.addEventListener('change', updateCard);
       });
+    updateCard(); // apply whatever the panel's defaults are on load, not just on first interaction
   </script>
 </body>
 </html>
