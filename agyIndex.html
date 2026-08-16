@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دعوة لمن نحب — إياد و بتول</title>
+
+<!-- Modern & Classic Typography from Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700&family=El+Messiri:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    /* Color Palette: Sage, Maroon, Beige & Gold Foil */
+    --bg-beige: #F8F4EE;
+    --bg-beige-deep: #EFE6D9;
+    --bg-card: rgba(255, 253, 249, 0.92);
+    
+    --sage-primary: #4A5D4E;
+    --sage-dark: #314234;
+    --sage-light: #EAEFEA;
+    
+    --maroon-primary: #6B1D2F;
+    --maroon-dark: #4A121E;
+    --maroon-light: #F7ECEF;
+
+    --gold-accent: #C5A059;
+    --gold-light: #F4ECE0;
+    --gold-deep: #9E7B3B;
+
+    --text-main: #2C2623;
+    --text-muted: #5C524B;
+    --border-hairline: rgba(197, 160, 89, 0.4);
+
+    --font-display: 'Aref Ruqaa', serif;
+    --font-heading: 'Amiri', serif;
+    --font-body: 'Cairo', sans-serif;
+
+    --shadow-subtle: 0 12px 35px rgba(74, 18, 30, 0.05);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100%;
+    font-size: 16px;
+  }
+
+  body {
+    background-color: var(--bg-beige);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+  }
+
+  /* ---- ENVELOPE OPENING OVERLAY ---- */
+  #envelopeOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    cursor: pointer;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Fullscreen Envelope Layer Elements */
+  .envelope-piece {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('static.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    transition: transform 1.25s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.85s ease 0.4s;
+    will-change: transform, opacity;
+  }
+
+  /* Top Piece (Flap + Wax Seal attached) via CSS mask-image */
+  .envelope-top {
+    z-index: 2;
+    mask-image: url('envelope_top_mask.png');
+    -webkit-mask-image: url('envelope_top_mask.png');
+    mask-size: cover;
+    -webkit-mask-size: cover;
+    mask-position: center center;
+    -webkit-mask-position: center center;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+  }
+
+  /* Bottom Piece (Envelope Body) via CSS mask-image */
+  .envelope-bottom {
+    z-index: 1;
+    mask-image: url('envelope_bottom_mask.png');
+    -webkit-mask-image: url('envelope_bottom_mask.png');
+    mask-size: cover;
+    -webkit-mask-size: cover;
+    mask-position: center center;
+    -webkit-mask-position: center center;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+  }
+
+  /* Opening State Triggered by Click */
+  #envelopeOverlay.open .envelope-top {
+    transform: translateY(-105%) scale(1.02);
+    opacity: 0;
+  }
+
+  #envelopeOverlay.open .envelope-bottom {
+    transform: translateY(105%) scale(1.02);
+    opacity: 0;
+  }
+
+  #envelopeOverlay.open {
+    pointer-events: none;
+    transition: background-color 1s ease 0.3s;
+    background-color: transparent;
+  }
+
+  /* "Click to Open" Prompt Indicator */
+  .open-prompt {
+    position: absolute;
+    bottom: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    background: rgba(248, 244, 238, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--gold-accent);
+    color: var(--maroon-primary);
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 30px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    animation: pulsePrompt 2s ease-in-out infinite;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  #envelopeOverlay.open .open-prompt {
+    opacity: 0;
+  }
+
+  @keyframes pulsePrompt {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.9; }
+    50% { transform: translateX(-50%) scale(1.05); opacity: 1; box-shadow: 0 10px 30px rgba(197, 160, 89, 0.5); }
+  }
+
+  /* ---- WEBSITE CONTENT & REVEAL ANIMATION ---- */
+  .main-wrapper {
+    max-width: 580px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    transform: scale(0.96);
+    transition: opacity 1.1s ease 0.3s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+  }
+
+  body.envelope-revealed .main-wrapper {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ---- Particle Canvas for Realistic Falling Leaves ---- */
+  #petalCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 1.2s ease 0.4s;
+  }
+
+  body.envelope-revealed #petalCanvas {
+    opacity: 1;
+  }
+
+  /* ---- Ambient Background ---- */
+  .bg-decor {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: 
+      radial-gradient(circle at 10% 10%, var(--sage-light) 0%, transparent 40%),
+      radial-gradient(circle at 90% 90%, var(--maroon-light) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, var(--bg-beige) 0%, var(--bg-beige-deep) 100%);
+    opacity: 0.95;
+  }
+
+  /* ---- 100dvh Page Section ---- */
+  .page-section {
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  /* ---- Luxury Double Border Card Frame ---- */
+  .luxury-frame {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-card);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid var(--gold-accent);
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 22px;
+    box-shadow: var(--shadow-subtle);
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .luxury-frame::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    border: 1.5px solid var(--sage-dark);
+    border-radius: 7px;
+    pointer-events: none;
+  }
+
+  .luxury-frame::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 1px dashed rgba(197, 160, 89, 0.35);
+    border-radius: 5px;
+    pointer-events: none;
+  }
+
+  /* Ornaments */
+  .ornament-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 12px 0;
+    color: var(--gold-accent);
+  }
+
+  .ornament-divider .line {
+    height: 1px;
+    width: 60px;
+    background: linear-gradient(90deg, transparent, var(--gold-accent), transparent);
+  }
+
+  .ornament-divider .symbol {
+    font-size: 0.8rem;
+    color: var(--gold-deep);
+  }
+
+  /* Typography Hierarchy */
+  .badge-intro {
+    font-size: 0.85rem;
+    color: var(--sage-dark);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .kicker-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 7vw, 2.9rem);
+    color: var(--maroon-primary);
+    margin-bottom: 2px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .lead-text {
+    font-family: var(--font-heading);
+    font-size: clamp(1.15rem, 3.8vw, 1.35rem);
+    color: var(--text-muted);
+    margin: 6px 0;
+  }
+
+  .fathers-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+
+  .father-name {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    color: var(--sage-dark);
+    line-height: 1.3;
+  }
+
+  .connector-and {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--gold-deep);
+    padding: 0 2px;
+  }
+
+  /* Couple Names Showcase */
+  .names-showcase {
+    margin: 14px 0 6px;
+  }
+
+  .names-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .groom-name, .bride-name {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 11vw, 4.4rem);
+    font-weight: 700;
+    color: var(--maroon-primary);
+    line-height: 1.05;
+  }
+
+  .names-amp {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    color: var(--gold-deep);
+    font-style: italic;
+  }
+
+  /* Anchored Section Footer */
+  .section-footer-anchored {
+    margin-top: auto;
+    width: 100%;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--maroon-dark);
+    font-weight: 600;
+  }
+
+  @media (max-width: 440px) {
+    .section-footer-anchored {
+      flex-direction: column;
+      gap: 4px;
+      text-align: center;
+    }
+  }
+
+  /* Section Headings */
+  .section-heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 5.5vw, 2.3rem);
+    color: var(--maroon-primary);
+    margin-bottom: 2px;
+    font-weight: 700;
+  }
+
+  /* Timeline Section */
+  .timeline-list {
+    list-style: none;
+    width: 100%;
+    max-width: 380px;
+    margin: 16px auto 0;
+    position: relative;
+    padding-right: 28px;
+    text-align: right;
+  }
+
+  .timeline-list::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    right: 7px;
+    width: 1.5px;
+    background: var(--gold-accent);
+    opacity: 0.6;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .timeline-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    right: -25.5px;
+    top: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--bg-beige);
+    border: 2px solid var(--maroon-primary);
+  }
+
+  .timeline-time {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--maroon-primary);
+    display: block;
+  }
+
+  .timeline-label {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+    display: block;
+  }
+
+  /* Location Section */
+  .locations-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .location-card {
+    background: rgba(248, 244, 238, 0.7);
+    border: 1px solid var(--border-hairline);
+    border-radius: 6px;
+    padding: 12px 14px;
+    text-align: right;
+  }
+
+  .location-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .location-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--sage-dark);
+  }
+
+  .location-time {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--maroon-primary);
+  }
+
+  .map-box {
+    width: 100%;
+    height: 110px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+    margin-bottom: 8px;
+  }
+
+  .map-box iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .btn-map-link {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--maroon-primary);
+    border: 1px solid var(--maroon-primary);
+    background: transparent;
+    transition: all 0.25s ease;
+  }
+
+  .btn-map-link:hover {
+    background: var(--maroon-primary);
+    color: #fff;
+  }
+
+  /* RSVP Section */
+  .rsvp-container {
+    width: 100%;
+    max-width: 380px;
+    margin-top: 10px;
+    text-align: right;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--sage-dark);
+    margin-bottom: 4px;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-hairline);
+    background: var(--bg-beige);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.25s ease;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--maroon-primary);
+  }
+
+  .rsvp-option-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-hairline);
+    background: var(--bg-beige);
+    cursor: pointer;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
+    transition: all 0.25s ease;
+  }
+
+  .rsvp-option-card.selected {
+    border-color: var(--maroon-primary);
+    background: var(--maroon-light);
+  }
+
+  .rsvp-option-card input[type="radio"] {
+    accent-color: var(--maroon-primary);
+    width: 16px;
+    height: 16px;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 12px;
+    border-radius: 4px;
+    border: none;
+    background: var(--maroon-primary);
+    color: #fff;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.25s ease;
+    margin-top: 4px;
+  }
+
+  .btn-submit:hover {
+    background: var(--maroon-dark);
+  }
+
+  .success-message {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--sage-light);
+    border: 1px solid var(--sage-primary);
+    border-radius: 4px;
+    color: var(--sage-dark);
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-align: center;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border-hairline);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .action-btn:hover {
+    border-color: var(--sage-primary);
+    color: var(--sage-dark);
+  }
+
+  /* Design Lab Drawer */
+  #labToggleBtn {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    z-index: 9999;
+    background: var(--maroon-primary);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  #designLabDrawer {
+    position: fixed;
+    bottom: 55px;
+    left: 16px;
+    z-index: 9999;
+    width: 240px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-hairline);
+    border-radius: 6px;
+    padding: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    direction: rtl;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    display: none;
+  }
+
+  #designLabDrawer.active { display: block; }
+  .lab-title { font-weight: 700; color: var(--maroon-primary); margin-bottom: 8px; }
+  .lab-control { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .lab-control input[type="color"] { width: 26px; height: 22px; border: none; cursor: pointer; background: none; }
+  .lab-control select { font-size: 0.75rem; padding: 2px 4px; }
+</style>
+</head>
+<body>
+
+  <!-- INTERACTIVE ENVELOPE OPENING OVERLAY -->
+  <div id="envelopeOverlay" title="اضغط لفتح الدعوة">
+    <div class="envelope-piece envelope-top"></div>
+    <div class="envelope-piece envelope-bottom"></div>
+    <div class="open-prompt">اضغط لفتح الدعوة ✨</div>
+  </div>
+
+  <!-- Ambient Visual Canvas & Gradients -->
+  <div class="bg-decor"></div>
+  <canvas id="petalCanvas"></canvas>
+
+  <main class="main-wrapper">
+
+    <!-- PAGE 1: HERO / MAIN INVITATION -->
+    <section class="page-section" id="hero">
+      <div class="luxury-frame">
+        
+        <span class="badge-intro">بسم الله الرحمن الرحيم</span>
+
+        <h1 class="kicker-title">دعوة لمن نحب</h1>
+
+        <div class="ornament-divider">
+          <span class="line"></span>
+          <span class="symbol">◆</span>
+          <span class="line"></span>
+        </div>
+
+        <p class="lead-text">يتشرف كل من</p>
+
+        <div class="fathers-row">
+          <span class="father-name">بكر محمد عرفات</span>
+          <span class="connector-and">و</span>
+          <span class="father-name">إبراهيم سعودي أبو خالد</span>
+        </div>
+
+        <p class="lead-text">بدعوتكم لحفل زفاف</p>
+
+        <div class="names-showcase">
+          <div class="names-row">
+            <span class="groom-name">إياد</span>
+            <span class="names-amp">&</span>
+            <span class="bride-name">بتول</span>
+          </div>
+        </div>
+
+        <div class="ornament-divider">
+          <span class="line"></span>
+          <span class="symbol">◆</span>
+          <span class="line"></span>
+        </div>
+
+        <!-- Anchored Footer Note at Bottom of Section 1 -->
+        <div class="section-footer-anchored">
+          <span>عدد المقاعد: ٢</span>
+          <span>أمسيتنا للكبار فقط؛ شاكرين لكم تفهّمكم</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 2: TIMELINE / SCHEDULE -->
+    <section class="page-section" id="schedule">
+      <div class="luxury-frame">
+
+        <h2 class="section-heading">مواعيد أمسيتنا</h2>
+
+        <div class="ornament-divider">
+          <span class="line"></span>
+          <span class="symbol">◆</span>
+          <span class="line"></span>
+        </div>
+
+        <ol class="timeline-list">
+          <li class="timeline-item">
+            <span class="timeline-time">٧:٠٠ مساءً</span>
+            <span class="timeline-label">الوصول واستقبال الضيوف</span>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-time">٨:٠٠ مساءً</span>
+            <span class="timeline-label">الزفة</span>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-time">٩:٠٠ مساءً</span>
+            <span class="timeline-label">حفل العشاء</span>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-time">١١:٠٠ مساءً</span>
+            <span class="timeline-label">ختام الحفل</span>
+          </li>
+        </ol>
+
+      </div>
+    </section>
+
+    <!-- PAGE 3: LOCATION SECTION -->
+    <section class="page-section" id="location">
+      <div class="luxury-frame">
+
+        <h2 class="section-heading">الموقع</h2>
+
+        <div class="ornament-divider">
+          <span class="line"></span>
+          <span class="symbol">◆</span>
+          <span class="line"></span>
+        </div>
+
+        <div class="locations-wrapper">
+          
+          <div class="location-card">
+            <div class="location-head">
+              <h3 class="location-title">بيت العروس</h3>
+              <span class="location-time">٧:٠٠ مساءً</span>
+            </div>
+            <div class="map-box">
+              <iframe loading="lazy" src="https://www.google.com/maps?q=31.9633,35.8306&z=15&output=embed" title="خريطة بيت العروس"></iframe>
+            </div>
+            <a href="https://maps.google.com/?q=31.9633,35.8306" target="_blank" class="btn-map-link">فتح في خرائط Google</a>
+          </div>
+
+          <div class="location-card">
+            <div class="location-head">
+              <h3 class="location-title">قاعة الحفل</h3>
+              <span class="location-time">٨:٠٠ مساءً</span>
+            </div>
+            <div class="map-box">
+              <iframe loading="lazy" src="https://www.google.com/maps?q=31.9750,35.8650&z=15&output=embed" title="خريطة قاعة الحفل"></iframe>
+            </div>
+            <a href="https://maps.google.com/?q=31.9750,35.8650" target="_blank" class="btn-map-link">فتح في خرائط Google</a>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 4: RSVP SECTION -->
+    <section class="page-section" id="rsvp">
+      <div class="luxury-frame">
+
+        <h2 class="section-heading">تأكيد الحضور</h2>
+
+        <div class="ornament-divider">
+          <span class="line"></span>
+          <span class="symbol">◆</span>
+          <span class="line"></span>
+        </div>
+
+        <p class="lead-text" style="font-size: 0.95rem; margin-bottom: 4px;">يسعدنا تأكيد حضوركم قبل موعد الحفل</p>
+
+        <div class="rsvp-container">
+          <form id="weddingRsvpForm">
+            
+            <div class="form-group">
+              <label class="form-label" for="guestName">اسم الضيف الكريم</label>
+              <input type="text" id="guestName" class="form-input" placeholder="الاسم الثلاثي" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">حالة الحضور</label>
+              
+              <label class="rsvp-option-card selected" id="cardYes">
+                <input type="radio" name="attendance" value="yes" checked>
+                <span>نعم، سنحضر بكل سرور</span>
+              </label>
+              
+              <label class="rsvp-option-card" id="cardNo">
+                <input type="radio" name="attendance" value="no">
+                <span>لا، لن نتمكن من الحضور</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="guestCount">عدد الحضور</label>
+              <select id="guestCount" class="form-select">
+                <option value="1">شخص واحد (١)</option>
+                <option value="2" selected>شخصان (٢)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="guestNotes">تهنئة للعروسين (اختياري)</label>
+              <textarea id="guestNotes" class="form-textarea" rows="2" placeholder="كلمة طيبة للعروسين..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">إرسال</button>
+          </form>
+
+          <div class="success-message" id="successToast">
+            تم استلام ردكم بنجاح. شكراً لكم!
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <button class="action-btn" id="addToCalBtn">📅 إضافة إلى التقويم</button>
+          <button class="action-btn" id="shareBtn">📲 مشاركة الدعوة</button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Design Lab Drawer -->
+  <button id="labToggleBtn">🎨 مختبر التصميم</button>
+  
+  <div id="designLabDrawer">
+    <div class="lab-title">تخصيص الألوان والخطوط</div>
+
+    <div class="lab-control">
+      <label for="pickerBg">خلفية الصفحة</label>
+      <input type="color" id="pickerBg" value="#F8F4EE">
+    </div>
+    <div class="lab-control">
+      <label for="pickerMaroon">اللون العنابي (Maroon)</label>
+      <input type="color" id="pickerMaroon" value="#6B1D2F">
+    </div>
+    <div class="lab-control">
+      <label for="pickerSage">اللون المريمي (Sage)</label>
+      <input type="color" id="pickerSage" value="#4A5D4E">
+    </div>
+    <div class="lab-control">
+      <label for="pickerGold">اللون الذهبي (Gold)</label>
+      <input type="color" id="pickerGold" value="#C5A059">
+    </div>
+
+    <div class="lab-control">
+      <label for="pickerDisplayFont">خط العناوين</label>
+      <select id="pickerDisplayFont">
+        <option value="'Aref Ruqaa', serif" selected>Aref Ruqaa</option>
+        <option value="'Amiri', serif">Amiri</option>
+        <option value="'El Messiri', sans-serif">El Messiri</option>
+      </select>
+    </div>
+
+    <div class="lab-control">
+      <label for="togglePetals">تساقط الأوراق</label>
+      <input type="checkbox" id="togglePetals" checked>
+    </div>
+  </div>
+
+  <script>
+    /* ---- 1. ENVELOPE OPENING ANIMATION SCRIPT ---- */
+    const envelopeOverlay = document.getElementById('envelopeOverlay');
+    let envelopeOpened = false;
+
+    function openEnvelope() {
+      if (envelopeOpened) return;
+      envelopeOpened = true;
+
+      // Trigger CSS opening transition
+      envelopeOverlay.classList.add('open');
+      document.body.classList.add('envelope-revealed');
+
+      // Hide overlay after animation finishes
+      setTimeout(() => {
+        envelopeOverlay.style.display = 'none';
+      }, 1500);
+    }
+
+    envelopeOverlay.addEventListener('click', openEnvelope);
+
+    /* ---- 2. Realistic Falling Botanical Leaves Canvas ---- */
+    const canvas = document.getElementById('petalCanvas');
+    const ctx = canvas.getContext('2d');
+    let petals = [];
+    let petalsEnabled = true;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Petal {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -30;
+        this.size = Math.random() * 10 + 9;
+        this.speedY = Math.random() * 0.9 + 0.5;
+        this.speedX = Math.random() * 0.6 - 0.3;
+        this.rotation = Math.random() * 360;
+        this.rotSpeed = Math.random() * 1.2 - 0.6;
+        this.flutter = Math.random() * Math.PI * 2;
+        this.flutterSpeed = Math.random() * 0.03 + 0.015;
+        this.opacity = Math.random() * 0.45 + 0.25;
+        this.type = Math.random() > 0.45 ? 'leaf' : 'petal';
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += Math.sin(this.y * 0.008) + this.speedX;
+        this.rotation += this.rotSpeed;
+        this.flutter += this.flutterSpeed;
+        if (this.y > canvas.height + 30) {
+          this.reset();
+        }
+      }
+      draw() {
+        if (!petalsEnabled) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.rotation * Math.PI) / 180);
+        
+        const scaleX = Math.sin(this.flutter);
+        ctx.scale(scaleX, 1);
+
+        const s = this.size;
+
+        if (this.type === 'leaf') {
+          ctx.fillStyle = `rgba(74, 93, 78, ${this.opacity})`;
+          ctx.beginPath();
+          ctx.moveTo(0, s);
+          ctx.bezierCurveTo(-s * 0.75, s * 0.3, -s * 0.7, -s * 0.5, 0, -s);
+          ctx.bezierCurveTo(s * 0.7, -s * 0.5, s * 0.75, s * 0.3, 0, s);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = `rgba(49, 66, 52, ${this.opacity * 0.8})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, s * 0.85);
+          ctx.lineTo(0, -s * 0.75);
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = `rgba(107, 29, 47, ${this.opacity})`;
+          ctx.beginPath();
+          ctx.moveTo(0, s * 0.8);
+          ctx.bezierCurveTo(-s * 0.8, s * 0.2, -s * 0.9, -s * 0.6, 0, -s * 0.5);
+          ctx.bezierCurveTo(s * 0.9, -s * 0.6, s * 0.8, s * 0.2, 0, s * 0.8);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < 24; i++) {
+      petals.push(new Petal());
+    }
+
+    function animatePetals() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (petalsEnabled) {
+        petals.forEach(p => {
+          p.update();
+          p.draw();
+        });
+      }
+      requestAnimationFrame(animatePetals);
+    }
+    animatePetals();
+
+    /* ---- 3. RSVP Radio Select Logic ---- */
+    const rsvpForm = document.getElementById('weddingRsvpForm');
+    const cardYes = document.getElementById('cardYes');
+    const cardNo = document.getElementById('cardNo');
+    const successToast = document.getElementById('successToast');
+
+    cardYes.addEventListener('click', () => {
+      cardYes.classList.add('selected');
+      cardNo.classList.remove('selected');
+      cardYes.querySelector('input').checked = true;
+    });
+
+    cardNo.addEventListener('click', () => {
+      cardNo.classList.add('selected');
+      cardYes.classList.remove('selected');
+      cardNo.querySelector('input').checked = true;
+    });
+
+    rsvpForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('guestName').value;
+      if (name.trim()) {
+        successToast.style.display = 'block';
+        rsvpForm.reset();
+        cardYes.classList.add('selected');
+        cardNo.classList.remove('selected');
+        setTimeout(() => {
+          successToast.style.display = 'none';
+        }, 5000);
+      }
+    });
+
+    /* ---- 4. Share & Add to Calendar ---- */
+    document.getElementById('shareBtn').addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: 'دعوة زفاف إياد و بتول',
+          text: 'يتشرف كل من بكر عرفات وإبراهيم أبو خالد بدعوتكم لحفل زفاف إياد و بتول',
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('تم نسخ رابط الدعوة إلى الحافظة!');
+      }
+    });
+
+    document.getElementById('addToCalBtn').addEventListener('click', () => {
+      const title = encodeURIComponent("حفل زفاف إياد و بتول");
+      const details = encodeURIComponent("يسعدنا حضوركم ومشاركتنا فرحتنا");
+      const location = encodeURIComponent("قاعة الحفل");
+      const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}&location=${location}`;
+      window.open(gcalUrl, '_blank');
+    });
+
+    /* ---- 5. Design Lab Drawer Toggle & Controls ---- */
+    const labBtn = document.getElementById('labToggleBtn');
+    const labDrawer = document.getElementById('designLabDrawer');
+
+    labBtn.addEventListener('click', () => {
+      labDrawer.classList.toggle('active');
+    });
+
+    document.getElementById('pickerBg').addEventListener('input', e => {
+      document.documentElement.style.setProperty('--bg-beige', e.target.value);
+    });
+    document.getElementById('pickerMaroon').addEventListener('input', e => {
+      document.documentElement.style.setProperty('--maroon-primary', e.target.value);
+    });
+    document.getElementById('pickerSage').addEventListener('input', e => {
+      document.documentElement.style.setProperty('--sage-primary', e.target.value);
+    });
+    document.getElementById('pickerGold').addEventListener('input', e => {
+      document.documentElement.style.setProperty('--gold-accent', e.target.value);
+    });
+    document.getElementById('pickerDisplayFont').addEventListener('change', e => {
+      document.documentElement.style.setProperty('--font-display', e.target.value);
+    });
+    document.getElementById('togglePetals').addEventListener('change', e => {
+      petalsEnabled = e.target.checked;
+    });
+  </script>
+</body>
+</html>

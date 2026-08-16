@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wedding Invitation</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      font-family: 'Playfair Display', Georgia, serif;
+      background-color: #FAF8F5;
+    }
+
+    /* ------------------------------
+       1. UNDERLYING FULL WEBPAGE
+       ------------------------------ */
+    #invitation-page {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      background: #FAF8F5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 24px;
+      z-index: 1;
+    }
+
+    .monogram-badge {
+      font-size: 2.2rem;
+      letter-spacing: 4px;
+      color: #9E7D3B;
+      margin-bottom: 20px;
+      border: 1px solid #9E7D3B;
+      width: 70px;
+      height: 70px;
+      line-height: 68px;
+      border-radius: 50%;
+      margin: 0 auto 30px auto;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: #2C2C2C;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .names {
+      font-size: 2.8rem;
+      color: #9E7D3B;
+      margin: 20px 0;
+      font-style: italic;
+    }
+
+    .details {
+      font-size: 1.1rem;
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 40px;
+    }
+
+    .btn-rsvp {
+      display: inline-block;
+      padding: 14px 36px;
+      background: #9E7D3B;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-radius: 30px;
+      box-shadow: 0 4px 15px rgba(158, 125, 59, 0.25);
+    }
+
+    /* ------------------------------
+       2. FULL-SCREEN ENVELOPE OVERLAY
+       ------------------------------ */
+    #envelope-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 999;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    /* Split layer containers */
+    .split-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+      will-change: transform;
+      background: #F4EFEA;
+    }
+
+    /* Both videos share the exact full screen frame */
+    .split-layer video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* THE SEAM CUTS:
+       - Top layer retains the area above the envelope fold
+       - Bottom layer retains the area below the envelope fold
+    */
+    .split-top {
+      clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 64%, 0 50%);
+      -webkit-clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 64%, 0 50%);
+    }
+
+    .split-bottom {
+      clip-path: polygon(0 50%, 50% 64%, 100% 50%, 100% 100%, 0 100%);
+      -webkit-clip-path: polygon(0 50%, 50% 64%, 100% 50%, 100% 100%, 0 100%);
+    }
+
+    /* Active split animation triggers */
+    #envelope-wrapper.open .split-top {
+      transform: translateY(-101vh);
+    }
+
+    #envelope-wrapper.open .split-bottom {
+      transform: translateY(101vh);
+    }
+
+    /* Tap prompt prompt UI */
+    .tap-hint {
+      position: absolute;
+      top: 66%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #9E7D3B;
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 1000;
+      transition: opacity 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <main id="invitation-page">
+    <div class="monogram-badge">EB</div>
+    <h1>Save The Date</h1>
+    <div class="names">Emily & Benjamin</div>
+    <div class="details">
+      Saturday, October 24, 2026<br>
+      The Grand Estate Gardens<br>
+      San Francisco, California
+    </div>
+    <a href="#rsvp" class="btn-rsvp">RSVP Online</a>
+  </main>
+
+  <div id="envelope-wrapper">
+    <div class="split-layer split-top">
+      <video id="vid-top" playsinline muted preload="auto">
+        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="split-layer split-bottom">
+      <video id="vid-bottom" playsinline muted preload="auto">
+        <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="tap-hint" id="tap-hint">Tap to Open</div>
+  </div>
+
+  <script>
+    const wrapper = document.getElementById('envelope-wrapper');
+    const vidTop = document.getElementById('vid-top');
+    const vidBottom = document.getElementById('vid-bottom');
+    const hint = document.getElementById('tap-hint');
+
+    let hasOpened = false;
+
+    // Synchronize both video frames
+    vidTop.addEventListener('timeupdate', () => {
+      if (Math.abs(vidTop.currentTime - vidBottom.currentTime) > 0.05) {
+        vidBottom.currentTime = vidTop.currentTime;
+      }
+    });
+
+    wrapper.addEventListener('click', async () => {
+      if (hasOpened) return;
+      hasOpened = true;
+      hint.style.opacity = '0';
+
+      try {
+        // Play synchronized videos on user interaction
+        await Promise.all([vidTop.play(), vidBottom.play()]);
+      } catch (err) {
+        console.log("Auto-advance on browser fallback:", err);
+      }
+
+      // Trigger the slide-split after the envelope opening sequence finishes
+      // (Adjust timeout to match the duration of your opening animation)
+      setTimeout(() => {
+        wrapper.classList.add('open');
+        
+        // Remove wrapper from DOM after transition completes to restore full touch scrolling
+        setTimeout(() => {
+          wrapper.style.display = 'none';
+        }, 1300);
+      }, 2000); 
+    });
+  </script>
+</body>
+</html>

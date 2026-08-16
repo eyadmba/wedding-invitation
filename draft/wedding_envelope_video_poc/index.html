@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Actual Video → Webpage Split PoC</title>
+<style>
+  :root { --ink:#5c503f; --paper:#f8f5ed; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:#f8f5ed; color:var(--ink); font-family:Georgia,"Times New Roman",serif; }
+  body { overflow-x:hidden; }
+
+  /* REAL, LONG HTML PAGE UNDERNEATH */
+  #site {
+    position:relative;
+    z-index:1;
+    min-height:260vh;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(173,145,95,.13), transparent 35rem),
+      #faf8f2;
+  }
+  .hero { min-height:100svh; display:grid; place-items:center; text-align:center; padding:5rem 1.5rem; }
+  .hero > div { max-width:700px; }
+  .eyebrow { font: .7rem system-ui,sans-serif; letter-spacing:.28em; text-transform:uppercase; }
+  h1 { font-size:clamp(3rem,13vw,7rem); font-weight:400; letter-spacing:.07em; margin:.9rem 0; }
+  .date { letter-spacing:.18em; text-transform:uppercase; font: .8rem system-ui,sans-serif; }
+  .section { min-height:70vh; display:grid; place-items:center; text-align:center; padding:4rem 2rem; border-top:1px solid #5c503f22; }
+  .section div { max-width:650px; }
+  .section h2 { font-size:clamp(2rem,8vw,4rem); font-weight:400; }
+  .rsvp { min-height:100vh; display:grid; place-items:center; padding:4rem 2rem; background:#eee8da; }
+  form { width:min(100%,500px); display:grid; gap:1rem; }
+  input,button { padding:1rem; font:inherit; border:1px solid #5c503f44; background:white; }
+  button { background:#5c503f; color:white; cursor:pointer; }
+
+  /*
+    THE ENVELOPE IS A REAL VIDEO.
+    We have TWO synchronized <video> elements.
+    Each shows the same video frame, but clip-path exposes a different
+    half. At the transition they physically separate.
+  */
+  #overlay {
+    position:fixed;
+    inset:0;
+    z-index:20;
+    background:#ece5d6;
+    overflow:hidden;
+    touch-action:manipulation;
+  }
+
+  .video-half {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    will-change:transform,clip-path;
+  }
+
+  #videoTop {
+    clip-path:polygon(0 0,100% 0,100% 50%,50% 50%,0 50%);
+  }
+
+  #videoBottom {
+    clip-path:polygon(0 50%,50% 50%,100% 50%,100% 100%,0 100%);
+  }
+
+  /*
+    This is the "webpage inside the envelope" window.
+    It is HTML, not part of the video.
+  */
+  #reveal {
+    position:absolute;
+    inset:0;
+    z-index:2;
+    overflow:hidden;
+    opacity:0;
+    clip-path:polygon(50% 50%,50% 50%,50% 50%,50% 50%);
+    background:#faf8f2;
+    pointer-events:none;
+  }
+
+  #fakeHero {
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    padding:2rem;
+  }
+  #fakeHero h2 {
+    font-size:clamp(2.8rem,12vw,6rem);
+    font-weight:400;
+    margin:.7rem 0;
+  }
+  #fakeHero .date { font: .75rem system-ui,sans-serif; letter-spacing:.18em; }
+
+  #hint {
+    position:absolute;
+    z-index:30;
+    left:0; right:0; bottom:max(25px,env(safe-area-inset-bottom));
+    text-align:center;
+    font: .7rem system-ui,sans-serif;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    color:#5c503faa;
+    pointer-events:none;
+  }
+
+  #state {
+    position:absolute; top:10px; left:10px; z-index:40;
+    padding:6px 8px; border-radius:5px;
+    font:11px system-ui,sans-serif;
+    background:#000b; color:white;
+    opacity:0;
+  }
+  #state.show { opacity:1; }
+
+  @media (min-width:700px) {
+    #overlay { width:520px; left:50%; transform:translateX(-50%); }
+  }
+</style>
+</head>
+<body>
+
+<main id="site">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Together with their families</div>
+      <h1>Elena &amp; Basil</h1>
+      <div class="date">August 24, 2026 · Villa di Como</div>
+      <p>↓ Scroll — this is real HTML</p>
+    </div>
+  </section>
+  <section class="section">
+    <div>
+      <div class="eyebrow">Our story</div>
+      <h2>A new chapter</h2>
+      <p>This content was underneath the video the entire time.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div>
+      <div class="eyebrow">The celebration</div>
+      <h2>Schedule &amp; Details</h2>
+      <p>Ceremony · Dinner · Dancing · Cake · Champagne</p>
+    </div>
+  </section>
+  <section class="rsvp">
+    <form onsubmit="event.preventDefault(); alert('Real HTML form interaction works.');">
+      <div class="eyebrow">Please join us</div>
+      <h2>RSVP</h2>
+      <input placeholder="Your name">
+      <input type="email" placeholder="Email">
+      <button>Send RSVP</button>
+    </form>
+  </section>
+</main>
+
+<div id="overlay">
+  <!-- TWO REAL VIDEO ELEMENTS, same source, synchronized by currentTime -->
+  <video id="videoTop" class="video-half" muted playsinline preload="auto"></video>
+  <video id="videoBottom" class="video-half" muted playsinline preload="auto"></video>
+
+  <!-- The real HTML "inside" the envelope -->
+  <div id="reveal">
+    <div id="fakeHero">
+      <div>
+        <div class="eyebrow">Together with their families</div>
+        <h2>Elena &amp; Basil</h2>
+        <div class="date">August 24, 2026 · Villa di Como</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="hint">Tap anywhere to open</div>
+  <div id="state">REAL VIDEO + CLIP-PATH + HTML</div>
+</div>
+
+<script>
+const overlay = document.querySelector('#overlay');
+const topVideo = document.querySelector('#videoTop');
+const bottomVideo = document.querySelector('#videoBottom');
+const reveal = document.querySelector('#reveal');
+const hint = document.querySelector('#hint');
+
+const src = 'envelope.mp4';
+topVideo.src = src;
+bottomVideo.src = src;
+
+let running = false;
+
+const ease = t => 1 - Math.pow(1-t,3);
+
+function animate(ms, fn) {
+  return new Promise(resolve => {
+    const start = performance.now();
+    function tick(now) {
+      const raw = Math.min(1, (now-start)/ms);
+      fn(ease(raw), raw);
+      if(raw < 1) requestAnimationFrame(tick);
+      else resolve();
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+function setReveal(p) {
+  // This is the animated envelope-shaped window.
+  const top = 50 - 19*p;
+  const bottom = 50 + 19*p;
+  const left = 50 - 42*p;
+  const right = 50 + 42*p;
+  reveal.style.clipPath =
+    `polygon(50% ${top}%, ${right}% 50%, 50% ${bottom}%, ${left}% 50%)`;
+  reveal.style.opacity = p;
+}
+
+async function start() {
+  if(running) return;
+  running = true;
+  hint.style.opacity = 0;
+
+  // Play the SAME REAL VIDEO in both halves.
+  // They remain synchronized throughout.
+  await Promise.all([
+    topVideo.play(),
+    bottomVideo.play()
+  ]);
+
+  // Let the video run as a normal video first.
+  await new Promise(r => setTimeout(r, 1800));
+
+  // Now reveal actual HTML through an animated clip-path.
+  await animate(850, p => {
+    setReveal(p);
+    // Keep video above the HTML except where the reveal window exists.
+    // The two video halves are unchanged here.
+  });
+
+  // THE IMPORTANT PART:
+  // Split the actual VIDEO into top/bottom clipped pieces and move
+  // those two video elements away from the HTML.
+  await animate(900, p => {
+    topVideo.style.transform = `translateY(${-105*p}%)`;
+    bottomVideo.style.transform = `translateY(${105*p}%)`;
+  });
+
+  // At this point the actual webpage is fully visible.
+  overlay.style.transition = 'opacity .18s ease';
+  overlay.style.opacity = '0';
+  await new Promise(r => setTimeout(r, 200));
+  overlay.remove();
+
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+overlay.addEventListener('click', start, {once:true});
+overlay.addEventListener('touchstart', start, {once:true, passive:true});
+</script>
+</body>
+</html>
