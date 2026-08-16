@@ -56,6 +56,29 @@
     --text-shadow-intensity: 0; /* 0 = no shadow (default); design-lab slider */
 
     --ornament-mark-rotate: 0deg; /* the ornament's center glyph; only "square" needs 45deg (see ORNAMENT_MARKS) */
+
+    /* ---- بسم الله الرحمن الرحيم, ported from agyIndex.html: its own font/
+       color/size, independent of both the shared and hero-specific text
+       controls -- it's neither a shared-section role nor really one of the
+       hero's existing roles, so it gets its own dedicated group in the
+       design lab instead of being folded into either. ---- */
+    --bismillah-font: 'Cairo', sans-serif;
+    --bismillah-color: #5c4d3f;
+    --bismillah-scale: 1;
+
+    /* ---- text sizes: same shape as the color system above -- one shared
+       scale for every section that isn't the hero, and one dedicated scale
+       per hero string, all defaulting to 1 (no change from the size
+       already baked into each element's own clamp()). Each is a plain
+       multiplier applied via calc(), not a replacement size, so the
+       responsive clamp() behavior (min/preferred/max) is preserved at
+       every scale. ---- */
+    --text-scale: 1;           /* shared: section titles, timeline, location, rsvp */
+    --kicker-scale: 1;
+    --names-scale: 1;
+    --fathers-scale: 1;
+    --hero-secondary-scale: 1;
+    --footer-scale: 1;
   }
 
   *{ box-sizing: border-box; }
@@ -556,31 +579,50 @@
   .section-title{
     margin:0;
     font-family: var(--font-display);
-    font-size: clamp(1.9rem, 6vw, 2.6rem);
+    font-size: calc(var(--text-scale, 1) * clamp(1.9rem, 6vw, 2.6rem));
     color: var(--title-color);
+  }
+
+  /* بسم الله الرحمن الرحيم, ported from agyIndex.html (its .badge-intro) --
+     own font/color/size, all independently controllable in the lab. */
+  .bismillah{
+    margin:0;
+    font-family: var(--bismillah-font);
+    font-size: calc(var(--bismillah-scale, 1) * clamp(0.85rem, 3vw, 1rem));
+    font-weight:700;
+    letter-spacing: 0.05em;
+    color: var(--bismillah-color);
   }
 
   .kicker{
     margin:0;
     font-family: var(--font-display);
-    font-size: clamp(1.6rem, 5.5vw, 2.2rem);
+    font-size: calc(var(--kicker-scale, 1) * clamp(1.6rem, 5.5vw, 2.2rem));
     letter-spacing: 0.05em;
     color: var(--kicker-color);
   }
 
   /* shared between the hero's two intro lines and the rsvp question. The
-     hero's own line gets its dedicated --hero-secondary (it's one of the
-     hero's several distinct low-level roles); the rsvp question instead
-     uses the shared --ink-soft "secondary text" color like every other
-     section. */
+     hero's own line gets its dedicated --hero-secondary color/scale (it's
+     one of the hero's several distinct low-level roles); the rsvp question
+     instead uses the shared --ink-soft color and --text-scale size like
+     every other section. Font-size lives on these scoped rules rather
+     than the shared .lead above so each can carry its own multiplier --
+     the ID selector's specificity wins over .lead regardless of source
+     order. */
   .lead{
     margin:0;
     font-family: var(--font-body);
-    font-size: clamp(1.05rem, 2.6vw, 1.3rem);
     letter-spacing: 0.02em;
   }
-  #hero .lead{ color: var(--hero-secondary); }
-  #rsvp-section .lead{ color: var(--ink-soft); }
+  #hero .lead{
+    color: var(--hero-secondary);
+    font-size: calc(var(--hero-secondary-scale, 1) * clamp(1.05rem, 2.6vw, 1.3rem));
+  }
+  #rsvp-section .lead{
+    color: var(--ink-soft);
+    font-size: calc(var(--text-scale, 1) * clamp(1.05rem, 2.6vw, 1.3rem));
+  }
 
   .row{
     width:100%;
@@ -596,14 +638,14 @@
   .fathers .father{
     font-family: var(--font-body);
     font-weight:700;
-    font-size: clamp(0.82rem, 4.4vw, 1.55rem);
+    font-size: calc(var(--fathers-scale, 1) * clamp(0.82rem, 4.4vw, 1.55rem));
     color: var(--fathers-color);
     line-height:1.35;
     white-space: nowrap;
   }
   .fathers .conn{
     font-family: var(--font-body);
-    font-size: clamp(1rem, 2.4vw, 1.2rem);
+    font-size: calc(var(--fathers-scale, 1) * clamp(1rem, 2.4vw, 1.2rem));
     color: var(--fathers-color);
   }
 
@@ -613,7 +655,7 @@
   .names .name{
     font-family: var(--font-display);
     font-weight:700;
-    font-size: clamp(2.6rem, 10vw, 4.6rem);
+    font-size: calc(var(--names-scale, 1) * clamp(2.6rem, 10vw, 4.6rem));
     line-height:1;
     color: var(--names-color);
     /* two stacked shadows, not one: the fixed highlight below is this
@@ -629,7 +671,7 @@
   }
   .names .conn{
     font-family: var(--font-body);
-    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-size: calc(var(--names-scale, 1) * clamp(1.4rem, 4vw, 2rem));
     color: var(--names-color);
     padding: 0 2px;
   }
@@ -644,7 +686,7 @@
     align-items:center;
     gap: 10px;
     font-family: var(--font-body);
-    font-size: clamp(0.95rem, 3.4vw, 1.1rem);
+    font-size: calc(var(--footer-scale, 1) * clamp(0.95rem, 3.4vw, 1.1rem));
     color: var(--footer-color);
     letter-spacing: 0.01em;
   }
@@ -739,13 +781,13 @@
     display:block;
     font-family: var(--font-body);
     font-weight:700;
-    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    font-size: calc(var(--text-scale, 1) * clamp(1.2rem, 4vw, 1.5rem));
     color: var(--ink);
   }
   .timeline-label{
     display:block;
     font-family: var(--font-body);
-    font-size: clamp(1rem, 3vw, 1.15rem);
+    font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.15rem));
     color: var(--ink-soft);
     margin-top: 2px;
   }
@@ -776,13 +818,13 @@
     margin:0;
     font-family: var(--font-body);
     font-weight:700;
-    font-size: clamp(1.1rem, 3.4vw, 1.3rem);
+    font-size: calc(var(--text-scale, 1) * clamp(1.1rem, 3.4vw, 1.3rem));
     color: var(--ink);
   }
   .location-card .location-time{
     font-family: var(--font-body);
     font-weight:700;
-    font-size: clamp(0.9rem, 2.8vw, 1.05rem);
+    font-size: calc(var(--text-scale, 1) * clamp(0.9rem, 2.8vw, 1.05rem));
     color: var(--ink-soft);
     white-space: nowrap;
   }
@@ -808,7 +850,7 @@
     justify-content:flex-start;
     gap: 10px;
     font-family: var(--font-body);
-    font-size: clamp(1rem, 3vw, 1.15rem);
+    font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.15rem));
     color: var(--ink-soft);
     border: 1px solid var(--hairline);
     border-radius: 10px;
@@ -829,7 +871,7 @@
     margin-top: 6px;
     font-family: var(--font-body);
     font-weight:700;
-    font-size: clamp(1rem, 3vw, 1.1rem);
+    font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.1rem));
     background: var(--ink);
     color: var(--sky);
     border:none;
@@ -876,7 +918,7 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     backdrop-filter: blur(6px);
     direction: ltr;
-    width: 248px;
+    width: 280px; /* bumped from 248px to fit the added size sliders/labels */
     max-height: calc(100vh - 80px);
     overflow-y: auto;
   }
@@ -1105,6 +1147,83 @@
     </label>
    </details>
 
+   <!-- بسم الله الرحمن الرحيم: its own font/color/size, kept together in
+        one group rather than split across Fonts/Colors/sizes below, since
+        it's neither a shared-section role nor one of the hero's existing
+        roles. -->
+   <details>
+    <summary>Bismillah</summary>
+    <label>Font
+      <select id="bismillahFontPicker">
+        <option value="'Almarai', sans-serif">Almarai</option>
+        <option value="'Amiri', serif">Amiri</option>
+        <option value="'Amiri Quran', serif">Amiri Quran</option>
+        <option value="'Aref Ruqaa', serif">Aref Ruqaa</option>
+        <option value="'Aref Ruqaa Ink', serif">Aref Ruqaa Ink</option>
+        <option value="'Cairo', sans-serif" selected>Cairo</option>
+        <option value="'El Messiri', sans-serif">El Messiri</option>
+        <option value="'Fustat', sans-serif">Fustat</option>
+        <option value="'Gulzar', serif">Gulzar</option>
+        <option value="'Harmattan', sans-serif">Harmattan</option>
+        <option value="'IBM Plex Sans Arabic', sans-serif">IBM Plex Sans Arabic</option>
+        <option value="'Jomhuria', serif">Jomhuria</option>
+        <option value="'Katibeh', serif">Katibeh</option>
+        <option value="'Lateef', serif">Lateef</option>
+        <option value="'Mada', sans-serif">Mada</option>
+        <option value="'Marhey', serif">Marhey</option>
+        <option value="'Markazi Text', serif">Markazi Text</option>
+        <option value="'Mirza', serif">Mirza</option>
+        <option value="'Noto Naskh Arabic', serif">Noto Naskh Arabic</option>
+        <option value="'Noto Nastaliq Urdu', serif">Noto Nastaliq Urdu</option>
+        <option value="'Qahiri', serif">Qahiri</option>
+        <option value="'Rakkas', serif">Rakkas</option>
+        <option value="'Reem Kufi', sans-serif">Reem Kufi</option>
+        <option value="'Scheherazade New', serif">Scheherazade New</option>
+        <option value="'Tajawal', sans-serif">Tajawal</option>
+        <option value="'Zain', sans-serif">Zain</option>
+      </select>
+    </label>
+    <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Color</span>
+      <input type="color" id="bismillahColorPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="bismillahColorHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="number" id="bismillahColorAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+    </label>
+    <label>Size
+      <input type="range" id="bismillahSizeRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+   </details>
+
+   <!-- text sizes: same shape as Colors/Hero text colors above -- one
+        shared scale for every section that isn't the hero, and dedicated
+        per-string scales for the hero below. Each is a multiplier on the
+        size that element already has, not a replacement value. -->
+   <details>
+    <summary>Text sizes</summary>
+    <label>Section titles, timeline, location, rsvp
+      <input type="range" id="textScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+   </details>
+
+   <details>
+    <summary>Hero text sizes</summary>
+    <label>Kicker
+      <input type="range" id="kickerScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+    <label>Bride &amp; groom names
+      <input type="range" id="namesScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+    <label>Fathers
+      <input type="range" id="fathersScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+    <label>Secondary (يتشرف / بدعوتكم)
+      <input type="range" id="heroSecondaryScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+    <label>Footer notice
+      <input type="range" id="footerScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+   </details>
+
    <details>
     <summary>Fonts</summary>
     <label>Display font
@@ -1260,6 +1379,8 @@
     <section class="page" id="hero">
 
       <div class="card">
+
+        <p class="bismillah">بسم الله الرحمن الرحيم</p>
 
         <div class="ornament">
           <span class="line"></span>
@@ -1856,6 +1977,8 @@
     wireColor('cardColorPicker', 'cardColorHex', null, null); // card color feeds updateCard() instead, below
     wireColor('leafColorPicker', 'leafColorHex', null, '--leaf-color');
     wireColor('petalColorPicker', 'petalColorHex', null, '--petal-color');
+    // deliberately its own control, not part of TEXT_COLOR_CONTROLS/apply-all below
+    wireColor('bismillahColorPicker', 'bismillahColorHex', 'bismillahColorAlpha', '--bismillah-color');
 
     /* ---- every text-color role in the page, one row per control: driven
        from a single list instead of a repeated call per var so the "apply
@@ -1890,6 +2013,28 @@
 
     document.getElementById('textShadowRange').addEventListener('input', e => {
       document.documentElement.style.setProperty('--text-shadow-intensity', e.target.value);
+    });
+
+    document.getElementById('bismillahFontPicker').addEventListener('change', e => {
+      document.documentElement.style.setProperty('--bismillah-font', e.target.value);
+    });
+
+    /* ---- text-size sliders: every one is a 50-200% multiplier on the size
+       an element already has (see the calc(var(--x-scale) * clamp(...))
+       in the CSS), so 100 always means "unchanged from shipped default". ---- */
+    const SCALE_RANGES = [
+      ['bismillahSizeRange', '--bismillah-scale'],
+      ['textScaleRange', '--text-scale'],
+      ['kickerScaleRange', '--kicker-scale'],
+      ['namesScaleRange', '--names-scale'],
+      ['fathersScaleRange', '--fathers-scale'],
+      ['heroSecondaryScaleRange', '--hero-secondary-scale'],
+      ['footerScaleRange', '--footer-scale'],
+    ];
+    SCALE_RANGES.forEach(([id, cssVar]) => {
+      document.getElementById(id).addEventListener('input', e => {
+        document.documentElement.style.setProperty(cssVar, Number(e.target.value) / 100);
+      });
     });
 
     /* ---- ornament center mark: swap the glyph text directly (there's one
@@ -2043,11 +2188,20 @@
       ['footerPicker', 'value', 'input'], ['footerHex', 'value', 'input'], ['footerAlpha', 'value', 'input'],
       ['leafColorPicker', 'value', 'input'], ['leafColorHex', 'value', 'input'],
       ['petalColorPicker', 'value', 'input'], ['petalColorHex', 'value', 'input'],
+      ['bismillahColorPicker', 'value', 'input'], ['bismillahColorHex', 'value', 'input'], ['bismillahColorAlpha', 'value', 'input'],
+      ['bismillahFontPicker', 'value', 'change'],
+      ['bismillahSizeRange', 'value', 'input'],
       ['displayFontPicker', 'value', 'change'],
       ['bodyFontPicker', 'value', 'change'],
       ['petalsToggle', 'checked', 'change'],
       ['textShadowRange', 'value', 'input'],
       ['ornamentMarkPicker', 'value', 'change'],
+      ['textScaleRange', 'value', 'input'],
+      ['kickerScaleRange', 'value', 'input'],
+      ['namesScaleRange', 'value', 'input'],
+      ['fathersScaleRange', 'value', 'input'],
+      ['heroSecondaryScaleRange', 'value', 'input'],
+      ['footerScaleRange', 'value', 'input'],
       ['bgPresetPicker', 'value', 'change'],
       ['bgParallaxToggle', 'checked', 'change'],
       ['bgParallaxRange', 'value', 'input'],
