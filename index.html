@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>دعوة لمن نحب — اياد و بتول</title>
+<title>اياد و بتول - دعوة لمن نحب</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Amiri+Quran&family=Aref+Ruqaa:wght@400;700&family=Aref+Ruqaa+Ink&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Cairo:wght@400;600;700&family=El+Messiri:wght@400;600;700&family=Fustat:wght@400;600;700&family=Gulzar&family=Harmattan&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Jomhuria&family=Katibeh&family=Lateef:wght@400;700&family=Mada:wght@400;600;700&family=Marhey:wght@400;700&family=Markazi+Text:wght@400;600;700&family=Mirza:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Qahiri&family=Rakkas&family=Reem+Kufi:wght@400;700&family=Scheherazade+New:wght@400;700&family=Tajawal:wght@400;500;700&family=Almarai:wght@400;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
@@ -1682,8 +1682,26 @@
     let bgDriftEnabled = true;
     let bgDriftMax = 70; // px, mirrors --bg-drift-max
 
+    /* stable viewport-height reference for the maxScroll math below -- same
+       reasoning as the .page min-height comment above (search "svh"):
+       window.innerHeight tracks the *current* browser-chrome state, so it
+       changes mid-scroll as the address bar animates in/out. Every `resize`
+       during that animation was recomputing maxScroll/fraction against a
+       moving target and snapping the photo's translateY to a new value the
+       instant the bars committed -- this was the "skip" being reported.
+       100svh is pinned to the chrome-always-visible viewport, so sampling it
+       gives the same number throughout the whole animation and the math
+       never jumps; it only changes on a *real* resize (rotation, window
+       resize), which is exactly when we want it to. */
+    const svhProbe = document.createElement('div');
+    svhProbe.style.cssText = 'position:absolute; visibility:hidden; height:100svh; width:0; top:0; pointer-events:none;';
+    document.body.appendChild(svhProbe);
+    function stableViewportHeight() {
+      return svhProbe.getBoundingClientRect().height;
+    }
+
     function updateBgImageDrift() {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const maxScroll = document.documentElement.scrollHeight - stableViewportHeight();
       const fraction = bgDriftEnabled && maxScroll > 0 ? window.scrollY / maxScroll : 0;
       bgImageEl.style.transform = `translateY(${-(fraction * bgDriftMax)}px)`;
     }

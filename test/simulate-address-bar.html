@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Simulate mobile address-bar hide/show</title>
+<style>
+  /*
+    Why this exists: on a real phone, scrolling makes the browser animate its
+    address bar (and sometimes tab bar) in/out. That doesn't change your
+    scroll position, but it DOES change the browser's layout viewport height
+    mid-scroll -- which fires `resize` and changes any CSS/JS that reads the
+    *current* viewport height (dvh, window.innerHeight, etc). Desktop browsers
+    have no address bar to hide, so you can't reproduce this by resizing the
+    browser window itself.
+
+    The trick: an <iframe> has its OWN viewport for vh/dvh/svh purposes and
+    for window.innerHeight *inside* it. If you resize the iframe element via
+    CSS, the page inside it experiences exactly the same kind of live
+    viewport-height change a phone's address bar produces -- same events,
+    same recalculations -- with zero code changes to the site itself. This
+    page just automates that resize so you don't have to drag anything by
+    hand.
+
+    Usage: serve this repo over a local static server (iframe->parent DOM
+    access needs same-origin, which file:// URLs don't reliably get) --
+    e.g. from the repo root: `python -m http.server 8000`, then open
+    http://localhost:8000/test/simulate-address-bar.html
+  */
+  html, body{ margin:0; height:100%; background:#1b1b1b; font-family: system-ui, sans-serif; color:#eee; }
+  .layout{ display:flex; height:100%; }
+  .controls{
+    width: 280px; flex: 0 0 auto; padding: 16px; box-sizing: border-box;
+    display:flex; flex-direction:column; gap: 14px; overflow-y:auto;
+    background:#242424; border-right:1px solid #3a3a3a;
+  }
+  .controls h1{ font-size: 15px; margin: 0 0 4px; }
+  .controls p{ font-size: 12px; line-height:1.5; color:#aaa; margin:4px 0; }
+  .row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  button{
+    font: inherit; font-size: 13px; padding: 8px 12px; border-radius: 6px;
+    border: 1px solid #555; background:#333; color:#eee; cursor:pointer;
+  }
+  button:hover{ background:#3d3d3d; }
+  button.active{ background:#5a7; border-color:#5a7; color:#111; }
+  label{ font-size: 12px; display:flex; flex-direction:column; gap:4px; }
+  input[type=range]{ width: 100%; }
+  input[type=number]{ width: 64px; font: inherit; background:#333; color:#eee; border:1px solid #555; border-radius:4px; padding:4px; }
+  .readout{ font-size:11px; background:#111; border:1px solid #333; border-radius:6px; padding:8px; white-space:pre-wrap; line-height:1.6; }
+  .stage{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    overflow:auto; background:
+      repeating-linear-gradient(45deg,#202020,#202020 10px,#262626 10px,#262626 20px);
+  }
+  .phone{
+    position:relative;
+    width: 390px;
+    border: 3px solid #666;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    background:#000;
+    transition: height 300ms ease; /* mirrors the ~300ms address-bar animation */
+  }
+  .phone.instant{ transition: none; }
+  .phone iframe{
+    display:block; width:100%; height:100%; border:0;
+  }
+  /* fixed reference line: if content visibly slides/snaps under this line
+     while the bars are "animating", that's the skip/jump being reproduced */
+  .refline{
+    position:absolute; left:0; right:0; top: 42%;
+    height:0; border-top: 2px dashed #f33;
+    pointer-events:none; z-index: 5;
+  }
+  .refline::after{
+    content:'reference line — watch for content jumping under this';
+    position:absolute; top:4px; left:4px; font-size:9px; color:#f88;
+    background:rgba(0,0,0,0.6); padding:2px 4px; border-radius:3px;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="controls">
+    <h1>Simulate address-bar hide/show</h1>
+    <p>Scroll the phone frame partway down first, then toggle/auto-cycle the
+    bar. Watch the dashed reference line — real mobile "skip" shows up as
+    content or the background photo snapping to a new position right when
+    the height changes.</p>
+
+    <div class="row">
+      <button id="btnShow">Bars shown (short)</button>
+      <button id="btnHide">Bars hidden (tall)</button>
+    </div>
+    <div class="row">
+      <button id="btnAuto">▶ Auto-cycle</button>
+      <button id="btnInstant">Instant (no transition)</button>
+    </div>
+
+    <label>Bar height (px)
+      <input type="range" id="barHeight" min="20" max="120" value="56">
+    </label>
+    <label>Cycle interval (ms)
+      <input type="number" id="interval" value="1800" min="300" step="100">
+    </label>
+    <label>Device width (px)
+      <input type="number" id="devWidth" value="390" min="280" max="600">
+    </label>
+
+    <div class="readout" id="readout">readout: waiting for same-origin access…</div>
+
+    <p>If the readout says "unavailable", you're opening this via
+    <code>file://</code> — serve the repo instead, e.g.
+    <code>python -m http.server 8000</code> from the repo root, then open
+    <code>http://localhost:8000/test/simulate-address-bar.html</code>.</p>
+  </div>
+
+  <div class="stage">
+    <div class="phone" id="phone">
+      <div class="refline"></div>
+      <iframe id="frame" src="../index.html"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+  const phone = document.getElementById('phone');
+  const frame = document.getElementById('frame');
+  const barHeightInput = document.getElementById('barHeight');
+  const intervalInput = document.getElementById('interval');
+  const devWidthInput = document.getElementById('devWidth');
+  const readout = document.getElementById('readout');
+
+  const BASE_HEIGHT = 700; // "bars shown" -- shorter viewport
+  let barsHidden = false;
+  let autoTimer = null;
+
+  function currentBarHeight() { return Number(barHeightInput.value); }
+
+  function applyHeight() {
+    phone.style.height = (BASE_HEIGHT + (barsHidden ? currentBarHeight() : 0)) + 'px';
+  }
+  function applyWidth() {
+    phone.style.width = devWidthInput.value + 'px';
+  }
+
+  function setBars(hidden) {
+    barsHidden = hidden;
+    applyHeight();
+    document.getElementById('btnShow').classList.toggle('active', !hidden);
+    document.getElementById('btnHide').classList.toggle('active', hidden);
+  }
+
+  document.getElementById('btnShow').addEventListener('click', () => setBars(false));
+  document.getElementById('btnHide').addEventListener('click', () => setBars(true));
+  barHeightInput.addEventListener('input', applyHeight);
+  devWidthInput.addEventListener('input', applyWidth);
+
+  document.getElementById('btnInstant').addEventListener('click', e => {
+    const on = phone.classList.toggle('instant');
+    e.target.classList.toggle('active', on);
+  });
+
+  document.getElementById('btnAuto').addEventListener('click', e => {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+      e.target.classList.remove('active');
+      e.target.textContent = '▶ Auto-cycle';
+      return;
+    }
+    e.target.classList.add('active');
+    e.target.textContent = '⏸ Stop cycling';
+    autoTimer = setInterval(() => setBars(!barsHidden), Number(intervalInput.value));
+  });
+
+  applyWidth();
+  applyHeight();
+
+  // ---- readout: peek into the iframe's own window/document, same-origin only ----
+  function tick() {
+    try {
+      const win = frame.contentWindow;
+      const doc = win.document;
+      const bg = doc.querySelector('.bg-image');
+      const bgTransform = bg ? getComputedStyle(bg).transform : 'n/a';
+      readout.textContent =
+        `iframe innerHeight: ${win.innerHeight}\n` +
+        `scrollY: ${Math.round(win.scrollY)}\n` +
+        `scrollHeight: ${doc.documentElement.scrollHeight}\n` +
+        `maxScroll: ${doc.documentElement.scrollHeight - win.innerHeight}\n` +
+        `.bg-image transform: ${bgTransform}`;
+    } catch (err) {
+      readout.textContent = 'readout unavailable (cross-origin — serve over http://, see note below)';
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+</script>
+</body>
+</html>
