@@ -34,29 +34,20 @@
     --gold-deep: #8a6a30;
     --hairline: rgba(90,70,40,0.28);
 
-    /* ---- per-role text colors: everything below used to just reuse --ink /
-       --ink-soft / --gold-deep, which meant e.g. "make the fathers' names
-       gold" also silently recolored the location-card times. Each role here
-       gets its own independent var (all default to whatever color it used
-       to inherit, so nothing changes visually until one is tweaked in the
-       design lab) so every text element can be classified and colored on
-       its own. ---- */
+    /* ---- per-role text colors: --ink/--ink-soft above already act as the
+       one shared "primary"/"secondary" text color used everywhere (the
+       timeline's time/label, the location cards' venue-name/time, and the
+       rsvp question/answers all just point at these two) -- only the hero
+       section gets its own dedicated vars below, since it's the one
+       section made of several distinct strings (kicker, two different
+       "lead" lines, two fathers, two names, a footer notice) that don't
+       reduce to a single primary/secondary pair. Everything else shares
+       --title-color for its section heading. ---- */
+    --title-color: #3a2f27;       /* shared section-title color (all sections) */
     --names-color: #3a2f27;       /* bride & groom names in the hero */
     --fathers-color: #8a6a30;     /* the two fathers' names in the hero */
     --hero-secondary: #5c4d3f;    /* hero's "يتشرف كل من" / "بدعوتكم" lines */
     --footer-color: #5c4d3f;      /* hero's bottom-of-screen seat-count notice */
-
-    --timeline-title-color: #3a2f27;
-    --timeline-primary: #8a6a30;    /* the time, e.g. ٧:٠٠ مساءً */
-    --timeline-secondary: #5c4d3f;  /* the label underneath, e.g. الوصول */
-
-    --location-title-color: #3a2f27;
-    --location-primary: #3a2f27;    /* the venue name, e.g. بيت العروس */
-    --location-secondary: #8a6a30;  /* the time beside it */
-
-    --rsvp-title-color: #3a2f27;
-    --rsvp-primary: #5c4d3f;    /* the question ("يسعدنا تأكيد حضوركم...") */
-    --rsvp-secondary: #3a2f27;  /* the yes/no answer text */
 
     --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
     --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
@@ -539,18 +530,13 @@
     color: var(--gold);
   }
 
-  /* shared across all three later sections -- color is deliberately NOT set
-     here; each section's title gets its own classification/var below (per
-     the design lab), so recoloring one section's title never touches the
-     others even though they share this base rule for layout. */
+  /* shared across all three later sections: one title color, site-wide. */
   .section-title{
     margin:0;
     font-family: var(--font-display);
     font-size: clamp(1.9rem, 6vw, 2.6rem);
+    color: var(--title-color);
   }
-  #timeline-section .section-title{ color: var(--timeline-title-color); }
-  #location-section .section-title{ color: var(--location-title-color); }
-  #rsvp-section .section-title{ color: var(--rsvp-title-color); }
 
   .kicker{
     margin:0;
@@ -560,9 +546,11 @@
     color: var(--gold);
   }
 
-  /* shared between the hero's two intro lines and the rsvp question -- same
-     reasoning as .section-title above, color is scoped per section instead
-     of set here. */
+  /* shared between the hero's two intro lines and the rsvp question. The
+     hero's own line gets its dedicated --hero-secondary (it's one of the
+     hero's several distinct low-level roles); the rsvp question instead
+     uses the shared --ink-soft "secondary text" color like every other
+     section. */
   .lead{
     margin:0;
     font-family: var(--font-body);
@@ -570,7 +558,7 @@
     letter-spacing: 0.02em;
   }
   #hero .lead{ color: var(--hero-secondary); }
-  #rsvp-section .lead{ color: var(--rsvp-primary); }
+  #rsvp-section .lead{ color: var(--ink-soft); }
 
   .row{
     width:100%;
@@ -728,13 +716,13 @@
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(1.2rem, 4vw, 1.5rem);
-    color: var(--timeline-primary);
+    color: var(--ink);
   }
   .timeline-label{
     display:block;
     font-family: var(--font-body);
     font-size: clamp(1rem, 3vw, 1.15rem);
-    color: var(--timeline-secondary);
+    color: var(--ink-soft);
     margin-top: 2px;
   }
 
@@ -765,13 +753,13 @@
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(1.1rem, 3.4vw, 1.3rem);
-    color: var(--location-primary);
+    color: var(--ink);
   }
   .location-card .location-time{
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(0.9rem, 2.8vw, 1.05rem);
-    color: var(--location-secondary);
+    color: var(--ink-soft);
     white-space: nowrap;
   }
   .location-card iframe{
@@ -797,7 +785,7 @@
     gap: 10px;
     font-family: var(--font-body);
     font-size: clamp(1rem, 3vw, 1.15rem);
-    color: var(--rsvp-secondary);
+    color: var(--ink-soft);
     border: 1px solid var(--hairline);
     border-radius: 10px;
     padding: 14px 16px;
@@ -809,18 +797,16 @@
     height: 18px;
     accent-color: var(--gold-deep);
   }
-  /* follows --rsvp-primary (the question's color) rather than its own var --
-     "primary" here reads as the section's dominant/emphasis color, so the
-     one action in the section leans on it too. Text stays --sky (the
-     on-accent color used elsewhere) since --rsvp-primary defaults to a dark
-     tone; if it's tuned to something light in the design lab this pairing
-     may need a second look. */
+  /* follows the shared --ink "primary" color rather than an accent, so it
+     reads as the section's own emphasis color. Text stays --sky (the
+     on-accent color used elsewhere); if --ink is ever tuned to something
+     light in the design lab this pairing may need a second look. */
   .rsvp-submit{
     margin-top: 6px;
     font-family: var(--font-body);
     font-weight:700;
     font-size: clamp(1rem, 3vw, 1.1rem);
-    background: var(--rsvp-primary);
+    background: var(--ink);
     color: var(--sky);
     border:none;
     border-radius: 10px;
@@ -1042,8 +1028,22 @@
       <input type="color" id="applyAllPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
       <button type="button" id="applyAllBtn" style="padding:4px 8px; font-size:11px; cursor:pointer; border-radius:5px; border:1px solid rgba(0,0,0,0.2); background:#fff;">Apply</button>
     </label>
+    <!-- Primary/Secondary text live in the "Colors" group above and already
+         apply everywhere (timeline time/label, location venue/time, rsvp
+         question/answers). This one title color is likewise shared by all
+         three section headings -- there's no per-section title anymore. -->
+    <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Section title (all sections)</span>
+      <input type="color" id="titleColorPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="titleColorHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="number" id="titleColorAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+    </label>
+    <!-- the hero is the one section made of several distinct strings
+         (kicker, two "lead" lines, fathers, names, footer notice) rather
+         than a clean primary/secondary pair, so it keeps its own low-level
+         controls here instead of following the shared vars above. -->
     <details>
-     <summary>Hero</summary>
+     <summary>Hero (low-level)</summary>
      <label style="justify-content:flex-start; gap:4px;">
        <span style="flex:1 1 auto; text-align:left;">Bride &amp; groom names</span>
        <input type="color" id="namesPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
@@ -1067,69 +1067,6 @@
        <input type="color" id="footerPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
        <input type="text" id="footerHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
        <input type="number" id="footerAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-    </details>
-    <details>
-     <summary>Timeline</summary>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Title</span>
-       <input type="color" id="timelineTitlePicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="timelineTitleHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="timelineTitleAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Primary (time)</span>
-       <input type="color" id="timelinePrimaryPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="timelinePrimaryHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="timelinePrimaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Secondary (label)</span>
-       <input type="color" id="timelineSecondaryPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="timelineSecondaryHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="timelineSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-    </details>
-    <details>
-     <summary>Location</summary>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Title</span>
-       <input type="color" id="locationTitlePicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="locationTitleHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="locationTitleAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Primary (venue name)</span>
-       <input type="color" id="locationPrimaryPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="locationPrimaryHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="locationPrimaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Secondary (time)</span>
-       <input type="color" id="locationSecondaryPicker" value="#8a6a30" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="locationSecondaryHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="locationSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-    </details>
-    <details>
-     <summary>RSVP</summary>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Title</span>
-       <input type="color" id="rsvpTitlePicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="rsvpTitleHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="rsvpTitleAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Primary (question)</span>
-       <input type="color" id="rsvpPrimaryPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="rsvpPrimaryHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="rsvpPrimaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
-     </label>
-     <label style="justify-content:flex-start; gap:4px;">
-       <span style="flex:1 1 auto; text-align:left;">Secondary (answers)</span>
-       <input type="color" id="rsvpSecondaryPicker" value="#3a2f27" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-       <input type="text" id="rsvpSecondaryHex" value="#3a2f27" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-       <input type="number" id="rsvpSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
      </label>
     </details>
    </details>
@@ -1862,19 +1799,11 @@
       { swatch: 'inkSoftPicker', hex: 'inkSoftHex', alpha: 'inkSoftAlpha', cssVar: '--ink-soft' },
       { swatch: 'goldPicker', hex: 'goldHex', alpha: 'goldAlpha', cssVar: '--gold' },
       { swatch: 'goldDeepPicker', hex: 'goldDeepHex', alpha: 'goldDeepAlpha', cssVar: '--gold-deep' },
+      { swatch: 'titleColorPicker', hex: 'titleColorHex', alpha: 'titleColorAlpha', cssVar: '--title-color' },
       { swatch: 'namesPicker', hex: 'namesHex', alpha: 'namesAlpha', cssVar: '--names-color' },
       { swatch: 'fathersPicker', hex: 'fathersHex', alpha: 'fathersAlpha', cssVar: '--fathers-color' },
       { swatch: 'heroSecondaryPicker', hex: 'heroSecondaryHex', alpha: 'heroSecondaryAlpha', cssVar: '--hero-secondary' },
       { swatch: 'footerPicker', hex: 'footerHex', alpha: 'footerAlpha', cssVar: '--footer-color' },
-      { swatch: 'timelineTitlePicker', hex: 'timelineTitleHex', alpha: 'timelineTitleAlpha', cssVar: '--timeline-title-color' },
-      { swatch: 'timelinePrimaryPicker', hex: 'timelinePrimaryHex', alpha: 'timelinePrimaryAlpha', cssVar: '--timeline-primary' },
-      { swatch: 'timelineSecondaryPicker', hex: 'timelineSecondaryHex', alpha: 'timelineSecondaryAlpha', cssVar: '--timeline-secondary' },
-      { swatch: 'locationTitlePicker', hex: 'locationTitleHex', alpha: 'locationTitleAlpha', cssVar: '--location-title-color' },
-      { swatch: 'locationPrimaryPicker', hex: 'locationPrimaryHex', alpha: 'locationPrimaryAlpha', cssVar: '--location-primary' },
-      { swatch: 'locationSecondaryPicker', hex: 'locationSecondaryHex', alpha: 'locationSecondaryAlpha', cssVar: '--location-secondary' },
-      { swatch: 'rsvpTitlePicker', hex: 'rsvpTitleHex', alpha: 'rsvpTitleAlpha', cssVar: '--rsvp-title-color' },
-      { swatch: 'rsvpPrimaryPicker', hex: 'rsvpPrimaryHex', alpha: 'rsvpPrimaryAlpha', cssVar: '--rsvp-primary' },
-      { swatch: 'rsvpSecondaryPicker', hex: 'rsvpSecondaryHex', alpha: 'rsvpSecondaryAlpha', cssVar: '--rsvp-secondary' },
     ];
     TEXT_COLOR_CONTROLS.forEach(c => wireColor(c.swatch, c.hex, c.alpha, c.cssVar));
 
