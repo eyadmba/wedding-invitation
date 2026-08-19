@@ -13,8 +13,8 @@
     --bg-color: #f4efe3;
     --star-color: #8a6a30;
     --bg-image: none;
-    --bg-drift-max: 70px;
-    --bg-position-y: 0%; /* where in the photo the crop starts, see .bg-image below */
+    --bg-drift-max: 150px;
+    --bg-position-y: 50%; /* where in the photo the crop starts, see .bg-image below */
 
     --card-bg: rgba(0,0,0,0);
     --card-blur: 0px;
@@ -345,6 +345,8 @@
     background-repeat: no-repeat;
     will-change: transform;
     pointer-events: none;
+	background-color: #d8d8d8;
+    background-blend-mode: multiply;
   }
 
   .stars{
@@ -1279,7 +1281,7 @@
       <span style="flex:1 1 auto; text-align:left;">Footer notice</span>
       <input type="color" id="footerPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
       <input type="text" id="footerHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-      <input type="number" id="footerAlpha" value="88" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+      <input type="number" id="footerAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
    </details>
 
@@ -1487,10 +1489,10 @@
          the way to its bottom edge -- there's no separate on/off switch
          for the drift, setting the amount to 0 already turns it off. -->
     <label>Start position
-      <input type="range" id="bgPositionRange" min="0" max="100" value="0" style="width:105px;">
+      <input type="range" id="bgPositionRange" min="0" max="100" value="50" style="width:105px;">
     </label>
     <label>Scroll amount
-      <input type="range" id="bgParallaxRange" min="0" max="150" value="70" style="width:105px;">
+      <input type="range" id="bgParallaxRange" min="0" max="150" value="150" style="width:105px;">
     </label>
    </details>
 
@@ -2270,7 +2272,7 @@
        on/off switch -- dragging "Scroll amount" to 0 already disables it,
        so a redundant toggle isn't needed. ---- */
     const bgImageEl = document.querySelector('.bg-image');
-    let bgDriftMax = 70; // px, mirrors --bg-drift-max
+    let bgDriftMax = 150; // px, mirrors --bg-drift-max
 
     /* stable viewport-height reference for the maxScroll math below -- same
        reasoning as the .page min-height comment above (search "svh"):
