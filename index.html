@@ -14,6 +14,7 @@
     --star-color: #8a6a30;
     --bg-image: none;
     --bg-drift-max: 70px;
+    --bg-position-y: 0%; /* where in the photo the crop starts, see .bg-image below */
 
     --card-bg: rgba(0,0,0,0);
     --card-blur: 0px;
@@ -39,27 +40,41 @@
     --gold: #a3813f;
     --gold-deep: #8a6a30;
     --hairline: rgba(90,70,40,0.28);
+    --ornament-color: #fff0d1; /* every section's ornament (deliberately its
+                                   own var rather than following --gold) */
 
     /* ---- per-role text colors: --ink/--ink-soft above already act as the
        one shared "primary"/"secondary" text color used everywhere (the
        timeline's time/label, the location cards' venue-name/time, and the
        rsvp question/answers all just point at these two) -- only the hero
        section gets its own dedicated vars below, since it's the one
-       section made of several distinct strings (kicker, two different
-       "lead" lines, two fathers, two names, a footer notice) that don't
-       reduce to a single primary/secondary pair. Everything else shares
-       --title-color for its section heading. All default to the same
-       near-white --ink tone above, not their own colors, per the same
-       "light everywhere, one deliberate dark exception" default. ---- */
+       section made of several distinct strings (kicker, verse, two
+       different "lead" lines, two fathers, the "و" connectors, two names,
+       a date line, a footer notice) that don't reduce to a single
+       primary/secondary pair. Everything else shares --title-color for its
+       section heading. All default to the same warm-ivory tone below
+       (ported from the theme1 reference hero, see the background-image
+       preset it ships alongside), each at its own opacity to match; the
+       "و" connectors have no dedicated var of their own, they just follow
+       whichever row they sit in (see .fathers .conn / .names .conn). ---- */
     --title-color: #edf2e4;        /* shared section-title color (all sections) */
-    --kicker-color: #edf2e4;       /* hero's "دعوة لمن نحب" line */
-    --names-color: #edf2e4;        /* bride & groom names in the hero */
-    --fathers-color: #edf2e4;      /* the two fathers' names in the hero */
-    --hero-secondary: #edf2e4;     /* hero's "يتشرف كل من" / "بدعوتكم" lines */
-    --footer-color: #edf2e4;       /* hero's bottom-of-screen seat-count notice */
+    --kicker-color: #f3ecd8;       /* hero's "دعوة لمن نحب" line */
+    --verse-color: rgba(243,236,216,0.85); /* hero's Quran verse line */
+    --names-color: #f3ecd8;        /* bride & groom names in the hero */
+    --fathers-color: #f3ecd8;      /* the two fathers' names in the hero;
+                                       both "و" connectors follow whichever
+                                       of these two vars their own row uses */
+    --hero-secondary: rgba(243,236,216,0.7); /* hero's "يتشرف كل من" / "بدعوتكم" lines */
+    --hero-date-color: rgba(243,236,216,0.75); /* hero's date/time line */
+    --footer-color: rgba(243,236,216,0.6); /* hero's bottom-of-screen seat-count notice */
 
     --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
     --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
+
+    /* the hero's glow, lifted verbatim from theme1's own .text-glow utility
+       (oklch(25% .02 150 / .45), 0 1px 18px) rather than an rgba
+       approximation -- see the elements that reference this below. */
+    --hero-glow: 0 1px 18px oklch(25% .02 150 / .45);
 
     --text-shadow-intensity: 0; /* 0 = no shadow (default); design-lab slider */
 
@@ -70,8 +85,8 @@
        controls -- it's neither a shared-section role nor really one of the
        hero's existing roles, so it gets its own dedicated group in the
        design lab instead of being folded into either. ---- */
-    --bismillah-font: 'Cairo', sans-serif;
-    --bismillah-color: #5c4d3f;
+    --bismillah-font: 'Aref Ruqaa', serif;
+    --bismillah-color: #f3ecd8;
     --bismillah-scale: 1;
 
     /* ---- text sizes: same shape as the color system above -- one shared
@@ -83,9 +98,11 @@
        every scale. ---- */
     --text-scale: 1;           /* shared: section titles, timeline, location, rsvp */
     --kicker-scale: 1;
+    --verse-scale: 1;
     --names-scale: 1;
     --fathers-scale: 1;
     --hero-secondary-scale: 1;
+    --hero-date-scale: 1;
     --footer-scale: 1;
   }
 
@@ -319,7 +336,12 @@
     z-index: -1;
     background-image: var(--bg-image, none);
     background-size: cover;
-    background-position: top center;
+    /* the design lab's "Start position" slider -- under cover, 0% anchors
+       the photo's top edge to the box's top (the old fixed "top center"),
+       100% anchors its bottom edge instead, so this is where the crop
+       *starts*; the scroll drift below then moves it further down from
+       there. */
+    background-position: center var(--bg-position-y, 0%);
     background-repeat: no-repeat;
     will-change: transform;
     pointer-events: none;
@@ -536,17 +558,29 @@
     gap: 28px;
     box-sizing: border-box;
   }
+  /* theme1's own .glass-card, lifted verbatim (gradient + saturate + border
+     + shadow token) rather than just a flat --card-bg -- this is what
+     actually reads as "darkening the background" in the reference, not a
+     separate overlay layer (checked the extracted stylesheet, there isn't
+     one). The gradient/border/shadow are the same across every section
+     (that sheen is the point -- one consistent card look site-wide); only
+     background-color and blur amount stay design-lab tunable via
+     --card-bg/--card-blur, layered underneath the gradient rather than
+     replaced by it. */
   html.card-on .card{
-    background: var(--card-bg);
-    -webkit-backdrop-filter: blur(var(--card-blur));
-    backdrop-filter: blur(var(--card-blur));
+    background-color: var(--card-bg);
+    background-image: linear-gradient(160deg, oklch(98% .01 95 / .2), oklch(90% .02 130 / .12));
+    -webkit-backdrop-filter: blur(var(--card-blur)) saturate(115%);
+    backdrop-filter: blur(var(--card-blur)) saturate(115%);
+    border: 1px solid oklch(98% .01 95 / .28);
     border-radius: 20px;
     padding: 36px 26px;
-    box-shadow: 0 24px 60px -28px rgba(0,0,0,0.28);
-    transition: background 0.25s ease, backdrop-filter 0.25s ease, -webkit-backdrop-filter 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 30px 80px -30px oklch(25% .03 150 / .55);
+    transition: background-color 0.25s ease, backdrop-filter 0.25s ease, -webkit-backdrop-filter 0.25s ease, box-shadow 0.25s ease;
   }
 
   #hero{
+    position: relative; /* anchors .hero-sprite below */
     padding-left: 14px;
     padding-right: 14px;
     /* svh, not the shared .page lvh: .footer-info is pinned near the
@@ -560,18 +594,42 @@
     min-height: min(100svh, 900px);
   }
 
+  /* ---- floating flower sprite, ported from the theme1 reference's
+     sprig.png -- there it decorates the plain sections *between* the busy
+     hero photo and the rest of the page; kept here scoped to the hero
+     alone per the requested scope, peeking from behind the card's top
+     corner with a slow drifting sway so it reads as alive rather than
+     pasted on. pointer-events:none so it never intercepts taps meant for
+     the card beneath it. ---- */
+  .hero-sprite{
+    position: absolute;
+    top: -18px;
+    right: 6%;
+    width: min(34vw, 150px);
+    z-index: 3;
+    pointer-events: none;
+    filter: drop-shadow(0 12px 20px rgba(20,34,20,0.25));
+    animation: hero-sprite-float 7s ease-in-out infinite;
+  }
+  @keyframes hero-sprite-float{
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-14px) rotate(2deg); }
+  }
+
+  /* one ornament color site-wide, deliberately its own var rather than
+     following the shared Accent (--gold) -- see --ornament-color. */
   .ornament{
     display:flex;
     align-items:center;
     justify-content:center;
     gap:14px;
-    color: var(--gold);
+    color: var(--ornament-color);
     width: 100%;
   }
   .ornament .line{
     height:1px;
     width: 70px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    background: linear-gradient(90deg, transparent, var(--ornament-color), transparent);
   }
   .ornament .mark{
     font-size: 1rem;
@@ -580,7 +638,7 @@
        turned 45deg to sit upright); every other shape, including the
        default star, keeps this at 0deg (see ORNAMENT_MARKS in the script). */
     transform: rotate(var(--ornament-mark-rotate, 0deg));
-    color: var(--gold);
+    color: var(--ornament-color);
   }
 
   /* shared across all three later sections: one title color, site-wide. */
@@ -592,14 +650,22 @@
   }
 
   /* بسم الله الرحمن الرحيم, ported from agyIndex.html (its .badge-intro) --
-     own font/color/size, all independently controllable in the lab. */
+     own font/color/size, all independently controllable in the lab. The
+     soft glow (also on .kicker/.row .conn/.names .name below) is hardcoded
+     rather than tied to the shared --text-shadow-intensity slider -- that
+     slider cascades to every section via .wrap, and this glow is only
+     meant to match the theme1 reference's hero, not spread site-wide. */
   .bismillah{
-    margin:0;
+    /* pulls in on both sides of the .card's shared 28px gap -- as its own
+       small, understated line, it read as floating in too much empty
+       space at that spacing. */
+    margin: -10px 0 -14px;
     font-family: var(--bismillah-font);
     font-size: calc(var(--bismillah-scale, 1) * clamp(0.85rem, 3vw, 1rem));
     font-weight:700;
     letter-spacing: 0.05em;
     color: var(--bismillah-color);
+    text-shadow: var(--hero-glow);
   }
 
   .kicker{
@@ -608,6 +674,21 @@
     font-size: calc(var(--kicker-scale, 1) * clamp(1.6rem, 5.5vw, 2.2rem));
     letter-spacing: 0.05em;
     color: var(--kicker-color);
+    text-shadow: var(--hero-glow);
+  }
+
+  /* the hero's Quran verse line, ported from the theme1 reference -- own
+     color/scale like every other distinct hero string (see the .row
+     comment below), Tajawal rather than --font-body since the reference
+     uses it specifically for this line regardless of whatever body font
+     is picked for the rest of the page. */
+  .verse{
+    margin:0;
+    font-family: 'Tajawal', sans-serif;
+    font-size: calc(var(--verse-scale, 1) * clamp(0.95rem, 2.8vw, 1.15rem));
+    line-height: 1.65;
+    color: var(--verse-color);
+    text-shadow: var(--hero-glow);
   }
 
   /* shared between the hero's two intro lines and the rsvp question. The
@@ -651,10 +732,14 @@
     line-height:1.35;
     white-space: nowrap;
   }
+  /* the "و" between the two fathers -- follows --fathers-color like the
+     names either side of it (matches .names .conn below: no dedicated
+     accent color for either connector, just its own row's color). */
   .fathers .conn{
     font-family: var(--font-body);
     font-size: calc(var(--fathers-scale, 1) * clamp(1rem, 2.4vw, 1.2rem));
     color: var(--fathers-color);
+    text-shadow: var(--hero-glow);
   }
 
   .names{
@@ -675,13 +760,29 @@
       0
       calc(var(--text-shadow-intensity) * 0.15px)
       calc(var(--text-shadow-intensity) * 0.6px)
-      rgba(0, 0, 0, calc(var(--text-shadow-intensity) * 0.045));
+      rgba(0, 0, 0, calc(var(--text-shadow-intensity) * 0.045)),
+      var(--hero-glow);
   }
+  /* the "و" between bride & groom -- follows --names-color like the two
+     names either side of it, same as .fathers .conn above. */
   .names .conn{
     font-family: var(--font-body);
     font-size: calc(var(--names-scale, 1) * clamp(1.4rem, 4vw, 2rem));
     color: var(--names-color);
+    text-shadow: var(--hero-glow);
     padding: 0 2px;
+  }
+
+  /* the hero's own date/time line, ported from the theme1 reference --
+     sits inside the card itself (after the closing ornament), separate
+     from .footer-info below (the seat-count notice, absolutely
+     positioned at the bottom of the *section*, outside the card). */
+  .hero-date{
+    margin:0;
+    font-family: 'Tajawal', sans-serif;
+    font-size: calc(var(--hero-date-scale, 1) * clamp(0.85rem, 2.6vw, 1rem));
+    color: var(--hero-date-color);
+    letter-spacing: 0.01em;
   }
 
   .footer-info{
@@ -1095,6 +1196,15 @@
       <input type="text" id="goldDeepHex" value="#8a6a30" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="goldDeepAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
+    <!-- its own var rather than following Accent above, so the ornament
+         (line + center mark, every section) can sit on a lighter cream
+         than the deeper gold used for the timeline dots/rsvp accents. -->
+    <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Ornament (all sections)</span>
+      <input type="color" id="ornamentColorPicker" value="#fff0d1" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="ornamentColorHex" value="#fff0d1" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="number" id="ornamentColorAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+    </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Apply one color to all text</span>
       <input type="color" id="applyAllPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
@@ -1102,10 +1212,10 @@
     </label>
     <!-- Primary/Secondary/Accent above already apply everywhere outside the
          hero (timeline time/label, location venue/time, rsvp
-         question/answers, ornaments). This title color is shared by all
-         three section headings the same way -- there's no per-section
-         title. The hero is the one section that doesn't follow any of
-         these -- see "Hero text colors" below instead. -->
+         question/answers). This title color is shared by all three
+         section headings the same way -- there's no per-section title.
+         The hero is the one section that doesn't follow any of these --
+         see "Hero text colors" below instead. -->
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Section title (all sections)</span>
       <input type="color" id="titleColorPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
@@ -1115,45 +1225,55 @@
    </details>
 
    <!-- the hero is the one section made of several distinct strings (kicker,
-        two "lead" lines, fathers, names, footer notice) rather than a clean
-        primary/secondary pair -- every one of its strings gets its own
-        control here instead of following the shared Colors above. The "و"
-        connectors follow whichever row they sit in (fathers' "و" tracks
-        Fathers, the names' "و" tracks Bride & groom names) rather than
-        having controls of their own. The ornament lines/marks are the one
-        thing left following the shared Accent colors, same as every other
-        section's decorations. -->
+        verse, two "lead" lines, fathers, names, a date line, footer
+        notice) rather than a clean primary/secondary pair -- every one of
+        its strings gets its own control here instead of following the
+        shared Colors above. The "و" connectors have no control of their
+        own (see .fathers .conn / .names .conn); the ornament is shared
+        site-wide too (see "Ornament" in Colors above). -->
    <details>
     <summary>Hero text colors</summary>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Kicker (دعوة لمن نحب)</span>
-      <input type="color" id="kickerPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="kickerHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="kickerPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="kickerHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="kickerAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Verse (وَمِنْ آيَاتِهِ...)</span>
+      <input type="color" id="versePicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="verseHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="number" id="verseAlpha" value="85" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+    </label>
+    <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Bride &amp; groom names</span>
-      <input type="color" id="namesPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="namesHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="namesPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="namesHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="namesAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Fathers</span>
-      <input type="color" id="fathersPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="fathersHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="fathersPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="fathersHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="fathersAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Secondary (يتشرف / بدعوتكم)</span>
-      <input type="color" id="heroSecondaryPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="heroSecondaryHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-      <input type="number" id="heroSecondaryAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+      <input type="color" id="heroSecondaryPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="heroSecondaryHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="number" id="heroSecondaryAlpha" value="70" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+    </label>
+    <label style="justify-content:flex-start; gap:4px;">
+      <span style="flex:1 1 auto; text-align:left;">Date line</span>
+      <input type="color" id="heroDatePicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="heroDateHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="number" id="heroDateAlpha" value="75" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Footer notice</span>
-      <input type="color" id="footerPicker" value="#edf2e4" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="footerHex" value="#edf2e4" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-      <input type="number" id="footerAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+      <input type="color" id="footerPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="footerHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="number" id="footerAlpha" value="60" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
    </details>
 
@@ -1168,9 +1288,9 @@
         <option value="'Almarai', sans-serif">Almarai</option>
         <option value="'Amiri', serif">Amiri</option>
         <option value="'Amiri Quran', serif">Amiri Quran</option>
-        <option value="'Aref Ruqaa', serif">Aref Ruqaa</option>
+        <option value="'Aref Ruqaa', serif" selected>Aref Ruqaa</option>
         <option value="'Aref Ruqaa Ink', serif">Aref Ruqaa Ink</option>
-        <option value="'Cairo', sans-serif" selected>Cairo</option>
+        <option value="'Cairo', sans-serif">Cairo</option>
         <option value="'El Messiri', sans-serif">El Messiri</option>
         <option value="'Fustat', sans-serif">Fustat</option>
         <option value="'Gulzar', serif">Gulzar</option>
@@ -1195,8 +1315,8 @@
     </label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Color</span>
-      <input type="color" id="bismillahColorPicker" value="#5c4d3f" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="bismillahColorHex" value="#5c4d3f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="bismillahColorPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="bismillahColorHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
       <input type="number" id="bismillahColorAlpha" value="100" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
     <label>Size
@@ -1220,6 +1340,9 @@
     <label>Kicker
       <input type="range" id="kickerScaleRange" min="50" max="200" value="100" style="width:130px;">
     </label>
+    <label>Verse
+      <input type="range" id="verseScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
     <label>Bride &amp; groom names
       <input type="range" id="namesScaleRange" min="50" max="200" value="100" style="width:130px;">
     </label>
@@ -1228,6 +1351,9 @@
     </label>
     <label>Secondary (يتشرف / بدعوتكم)
       <input type="range" id="heroSecondaryScaleRange" min="50" max="200" value="100" style="width:130px;">
+    </label>
+    <label>Date line
+      <input type="range" id="heroDateScaleRange" min="50" max="200" value="100" style="width:130px;">
     </label>
     <label>Footer notice
       <input type="range" id="footerScaleRange" min="50" max="200" value="100" style="width:130px;">
@@ -1336,8 +1462,9 @@
       <select id="bgPresetPicker">
         <option value="">— none —</option>
         <option value="backgrounds/pin2.jpg">pin2</option>
-        <option value="backgrounds/pintrest1.jpg" selected>pintrest1</option>
+        <option value="backgrounds/pintrest1.jpg">pintrest1</option>
         <option value="backgrounds/sage-hires.png">sage-hires</option>
+        <option value="backgrounds/sage-floral.jpg" selected>sage-floral (theme1)</option>
       </select>
     </label>
     <label style="justify-content:flex-start; gap:6px;">
@@ -1346,7 +1473,16 @@
     <label>
       <button type="button" id="bgImageClear" style="width:100%; padding:4px 6px; font-size:12px; cursor:pointer; border-radius:5px; border:1px solid rgba(0,0,0,0.2); background:#fff;">Clear image</button>
     </label>
-    <label>Scroll a little <input type="checkbox" id="bgParallaxToggle" checked></label>
+    <!-- "start position" picks where in the source photo the visible crop
+         begins (0% = its very top, 100% = its very bottom, same units as
+         CSS background-position-y under background-size:cover); "scroll
+         amount" is how far it then drifts *down* from there as the page
+         scrolls. Together they can start mid-photo and drift the rest of
+         the way to its bottom edge -- there's no separate on/off switch
+         for the drift, setting the amount to 0 already turns it off. -->
+    <label>Start position
+      <input type="range" id="bgPositionRange" min="0" max="100" value="0" style="width:105px;">
+    </label>
     <label>Scroll amount
       <input type="range" id="bgParallaxRange" min="0" max="150" value="70" style="width:105px;">
     </label>
@@ -1357,8 +1493,8 @@
     <label>Card background <input type="checkbox" id="cardToggle" checked></label>
     <label style="justify-content:flex-start; gap:4px;">
       <span style="flex:1 1 auto; text-align:left;">Card color</span>
-      <input type="color" id="cardColorPicker" value="#ffffff" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
-      <input type="text" id="cardColorHex" value="#ffffff" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
+      <input type="color" id="cardColorPicker" value="#878787" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
+      <input type="text" id="cardColorHex" value="#878787" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
     </label>
     <label>Card opacity
       <input type="range" id="cardAlphaRange" min="0" max="100" value="20" style="width:105px;">
@@ -1388,6 +1524,11 @@
     <!-- 1. hero / intro -->
     <section class="page" id="hero">
 
+      <!-- floating flower sprite, ported from theme1's sprig.png -- kept
+           to the hero only, per the requested scope (see the .hero-sprite
+           comment in <style> for why it's not reused site-wide). -->
+      <img class="hero-sprite" src="hero-sprig.png" alt="">
+
       <div class="card">
 
         <p class="bismillah">بسم الله الرحمن الرحيم</p>
@@ -1399,6 +1540,9 @@
         </div>
 
         <p class="kicker" id="kickerText">دعوة لمن نحب</p>
+
+        <!-- ported from the theme1 reference hero -->
+        <p class="verse">«وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً»</p>
 
         <p class="lead">يتشرف كل من</p>
 
@@ -1421,6 +1565,9 @@
           <span class="mark">✦</span>
           <span class="line"></span>
         </div>
+
+        <!-- ported from the theme1 reference hero -->
+        <p class="hero-date">الجمعة ٢٥ أيلول ٢٠٢٦ — الساعة السابعة مساءً</p>
 
       </div>
 
@@ -1989,6 +2136,9 @@
     wireColor('petalColorPicker', 'petalColorHex', null, '--petal-color');
     // deliberately its own control, not part of TEXT_COLOR_CONTROLS/apply-all below
     wireColor('bismillahColorPicker', 'bismillahColorHex', 'bismillahColorAlpha', '--bismillah-color');
+    // same reasoning: a decoration, not a text role, so left out of the
+    // "apply one color to all text" sweep below
+    wireColor('ornamentColorPicker', 'ornamentColorHex', 'ornamentColorAlpha', '--ornament-color');
 
     /* ---- every text-color role in the page, one row per control: driven
        from a single list instead of a repeated call per var so the "apply
@@ -2002,9 +2152,11 @@
       { swatch: 'goldDeepPicker', hex: 'goldDeepHex', alpha: 'goldDeepAlpha', cssVar: '--gold-deep' },
       { swatch: 'titleColorPicker', hex: 'titleColorHex', alpha: 'titleColorAlpha', cssVar: '--title-color' },
       { swatch: 'kickerPicker', hex: 'kickerHex', alpha: 'kickerAlpha', cssVar: '--kicker-color' },
+      { swatch: 'versePicker', hex: 'verseHex', alpha: 'verseAlpha', cssVar: '--verse-color' },
       { swatch: 'namesPicker', hex: 'namesHex', alpha: 'namesAlpha', cssVar: '--names-color' },
       { swatch: 'fathersPicker', hex: 'fathersHex', alpha: 'fathersAlpha', cssVar: '--fathers-color' },
       { swatch: 'heroSecondaryPicker', hex: 'heroSecondaryHex', alpha: 'heroSecondaryAlpha', cssVar: '--hero-secondary' },
+      { swatch: 'heroDatePicker', hex: 'heroDateHex', alpha: 'heroDateAlpha', cssVar: '--hero-date-color' },
       { swatch: 'footerPicker', hex: 'footerHex', alpha: 'footerAlpha', cssVar: '--footer-color' },
     ];
     TEXT_COLOR_CONTROLS.forEach(c => wireColor(c.swatch, c.hex, c.alpha, c.cssVar));
@@ -2036,9 +2188,11 @@
       ['bismillahSizeRange', '--bismillah-scale'],
       ['textScaleRange', '--text-scale'],
       ['kickerScaleRange', '--kicker-scale'],
+      ['verseScaleRange', '--verse-scale'],
       ['namesScaleRange', '--names-scale'],
       ['fathersScaleRange', '--fathers-scale'],
       ['heroSecondaryScaleRange', '--hero-secondary-scale'],
+      ['heroDateScaleRange', '--hero-date-scale'],
       ['footerScaleRange', '--footer-scale'],
     ];
     SCALE_RANGES.forEach(([id, cssVar]) => {
@@ -2106,9 +2260,10 @@
        using the scroll fraction (scrollY / max scrollable distance) rather
        than raw scrollY means it keeps drifting gently the whole way down,
        arriving at its max exactly at the bottom of the page, instead of
-       hitting a hard cap early and then sitting dead still. ---- */
+       hitting a hard cap early and then sitting dead still. No separate
+       on/off switch -- dragging "Scroll amount" to 0 already disables it,
+       so a redundant toggle isn't needed. ---- */
     const bgImageEl = document.querySelector('.bg-image');
-    let bgDriftEnabled = true;
     let bgDriftMax = 70; // px, mirrors --bg-drift-max
 
     /* stable viewport-height reference for the maxScroll math below -- same
@@ -2131,21 +2286,20 @@
 
     function updateBgImageDrift() {
       const maxScroll = document.documentElement.scrollHeight - stableViewportHeight();
-      const fraction = bgDriftEnabled && maxScroll > 0 ? window.scrollY / maxScroll : 0;
+      const fraction = maxScroll > 0 ? window.scrollY / maxScroll : 0;
       bgImageEl.style.transform = `translateY(${-(fraction * bgDriftMax)}px)`;
     }
     window.addEventListener('scroll', updateBgImageDrift, { passive: true });
     window.addEventListener('resize', updateBgImageDrift);
     updateBgImageDrift();
 
-    document.getElementById('bgParallaxToggle').addEventListener('change', e => {
-      bgDriftEnabled = e.target.checked;
-      updateBgImageDrift();
-    });
     document.getElementById('bgParallaxRange').addEventListener('input', e => {
       bgDriftMax = Number(e.target.value);
       document.documentElement.style.setProperty('--bg-drift-max', bgDriftMax + 'px');
       updateBgImageDrift();
+    });
+    document.getElementById('bgPositionRange').addEventListener('input', e => {
+      document.documentElement.style.setProperty('--bg-position-y', e.target.value + '%');
     });
 
     /* ---- section card: background color/opacity + optional blur ---- */
@@ -2192,13 +2346,16 @@
       ['goldDeepPicker', 'value', 'input'], ['goldDeepHex', 'value', 'input'], ['goldDeepAlpha', 'value', 'input'],
       ['titleColorPicker', 'value', 'input'], ['titleColorHex', 'value', 'input'], ['titleColorAlpha', 'value', 'input'],
       ['kickerPicker', 'value', 'input'], ['kickerHex', 'value', 'input'], ['kickerAlpha', 'value', 'input'],
+      ['versePicker', 'value', 'input'], ['verseHex', 'value', 'input'], ['verseAlpha', 'value', 'input'],
       ['namesPicker', 'value', 'input'], ['namesHex', 'value', 'input'], ['namesAlpha', 'value', 'input'],
       ['fathersPicker', 'value', 'input'], ['fathersHex', 'value', 'input'], ['fathersAlpha', 'value', 'input'],
       ['heroSecondaryPicker', 'value', 'input'], ['heroSecondaryHex', 'value', 'input'], ['heroSecondaryAlpha', 'value', 'input'],
+      ['heroDatePicker', 'value', 'input'], ['heroDateHex', 'value', 'input'], ['heroDateAlpha', 'value', 'input'],
       ['footerPicker', 'value', 'input'], ['footerHex', 'value', 'input'], ['footerAlpha', 'value', 'input'],
       ['leafColorPicker', 'value', 'input'], ['leafColorHex', 'value', 'input'],
       ['petalColorPicker', 'value', 'input'], ['petalColorHex', 'value', 'input'],
       ['bismillahColorPicker', 'value', 'input'], ['bismillahColorHex', 'value', 'input'], ['bismillahColorAlpha', 'value', 'input'],
+      ['ornamentColorPicker', 'value', 'input'], ['ornamentColorHex', 'value', 'input'], ['ornamentColorAlpha', 'value', 'input'],
       ['bismillahFontPicker', 'value', 'change'],
       ['bismillahSizeRange', 'value', 'input'],
       ['displayFontPicker', 'value', 'change'],
@@ -2208,12 +2365,14 @@
       ['ornamentMarkPicker', 'value', 'change'],
       ['textScaleRange', 'value', 'input'],
       ['kickerScaleRange', 'value', 'input'],
+      ['verseScaleRange', 'value', 'input'],
       ['namesScaleRange', 'value', 'input'],
       ['fathersScaleRange', 'value', 'input'],
       ['heroSecondaryScaleRange', 'value', 'input'],
+      ['heroDateScaleRange', 'value', 'input'],
       ['footerScaleRange', 'value', 'input'],
       ['bgPresetPicker', 'value', 'change'],
-      ['bgParallaxToggle', 'checked', 'change'],
+      ['bgPositionRange', 'value', 'input'],
       ['bgParallaxRange', 'value', 'input'],
       ['cardToggle', 'checked', 'change'],
       ['cardColorPicker', 'value', 'input'], ['cardColorHex', 'value', 'input'],
