@@ -66,7 +66,7 @@
                                        of these two vars their own row uses */
     --hero-secondary: rgba(243,236,216,0.7); /* hero's "يتشرف كل من" / "بدعوتكم" lines */
     --hero-date-color: rgba(243,236,216,0.75); /* hero's date/time line */
-    --footer-color: rgba(243,236,216,0.6); /* hero's bottom-of-screen seat-count notice */
+    --footer-color: rgba(243,236,216,0.88); /* hero's bottom-of-screen seat-count notice */
 
     --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
     --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
@@ -138,7 +138,7 @@
   #envelope .envelope-half{
     position: absolute;
     inset: 0;
-    background-image: url('envelope-no-wax-seal.png');
+    background-image: url('assets/envelope-no-wax-seal.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -174,7 +174,7 @@
   }
   #envelope .envelope-seal{
     z-index: 3;
-    background-image: url('seal-overlay.png');
+    background-image: url('assets/seal-overlay.png');
     /* no mask at all -- the seal graphic's own transparency already
        isolates it, so it never needs clipping around its real edge */
     -webkit-mask-image: none;
@@ -669,7 +669,7 @@
   }
 
   .kicker{
-    margin:0;
+    margin: -12px 0 0;
     font-family: var(--font-display);
     font-size: calc(var(--kicker-scale, 1) * clamp(1.6rem, 5.5vw, 2.2rem));
     letter-spacing: 0.05em;
@@ -722,6 +722,7 @@
   }
 
   .fathers{
+    margin: -12px 0 -10px;
     column-gap: clamp(4px, 1.8vw, 16px);
   }
   .fathers .father{
@@ -729,7 +730,7 @@
     font-weight:700;
     font-size: calc(var(--fathers-scale, 1) * clamp(0.82rem, 4.4vw, 1.55rem));
     color: var(--fathers-color);
-    line-height:1.35;
+    line-height:1.3;
     white-space: nowrap;
   }
   /* the "و" between the two fathers -- follows --fathers-color like the
@@ -748,7 +749,7 @@
   .names .name{
     font-family: var(--font-display);
     font-weight:700;
-    font-size: calc(var(--names-scale, 1) * clamp(2.6rem, 10vw, 4.6rem));
+    font-size: calc(var(--names-scale, 1) * clamp(3.2rem, 11.5vw, 5.2rem));
     line-height:1;
     color: var(--names-color);
     /* two stacked shadows, not one: the fixed highlight below is this
@@ -767,7 +768,7 @@
      names either side of it, same as .fathers .conn above. */
   .names .conn{
     font-family: var(--font-body);
-    font-size: calc(var(--names-scale, 1) * clamp(1.4rem, 4vw, 2rem));
+    font-size: calc(var(--names-scale, 1) * clamp(1.6rem, 4.8vw, 2.3rem));
     color: var(--names-color);
     text-shadow: var(--hero-glow);
     padding: 0 2px;
@@ -778,7 +779,7 @@
      from .footer-info below (the seat-count notice, absolutely
      positioned at the bottom of the *section*, outside the card). */
   .hero-date{
-    margin:0;
+    margin: -6px 0 0;
     font-family: 'Tajawal', sans-serif;
     font-size: calc(var(--hero-date-scale, 1) * clamp(0.85rem, 2.6vw, 1rem));
     color: var(--hero-date-color);
@@ -798,20 +799,26 @@
     font-size: calc(var(--footer-scale, 1) * clamp(0.95rem, 3.4vw, 1.1rem));
     color: var(--footer-color);
     letter-spacing: 0.01em;
+    text-shadow: var(--hero-glow);
   }
   .footer-info span{
     white-space: nowrap;
   }
 
-  @media (max-width: 420px){
+  @media (max-width: 480px){
+    #hero{
+      padding-top: clamp(24px, 4.5vh, 44px);
+      padding-bottom: clamp(68px, 9.5vh, 88px);
+    }
+    #hero .card{
+      gap: clamp(14px, 2.4vh, 22px);
+    }
     .footer-info{
       flex-direction: column;
       align-items:center;
-      gap: 8px;
-      bottom: 18px;
-    }
-    #hero{
-      padding-bottom: 100px;
+      gap: 6px;
+      bottom: 14px;
+      font-size: calc(var(--footer-scale, 1) * clamp(0.85rem, 3.2vw, 1.05rem));
     }
   }
 
@@ -1101,7 +1108,7 @@
     // are already browser-cached, the loader never actually gets shown
     (function(){
       const loader = document.getElementById('loader');
-      const sources = ['envelope-no-wax-seal.png', 'seal-overlay.png'];
+      const sources = ['assets/envelope-no-wax-seal.png', 'assets/seal-overlay.png'];
       let remaining = sources.length;
       function hideLoader(){
         loader.classList.add('loader-done');
@@ -1273,7 +1280,7 @@
       <span style="flex:1 1 auto; text-align:left;">Footer notice</span>
       <input type="color" id="footerPicker" value="#f3ecd8" style="width:22px;height:20px;padding:0;flex:0 0 auto;">
       <input type="text" id="footerHex" value="#f3ecd8" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
-      <input type="number" id="footerAlpha" value="60" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
+      <input type="number" id="footerAlpha" value="88" min="0" max="100" title="Opacity %" style="width:32px;font-size:11px;padding:2px;flex:0 0 auto;">
     </label>
    </details>
 
@@ -1461,10 +1468,10 @@
     <label>Official background
       <select id="bgPresetPicker">
         <option value="">— none —</option>
-        <option value="backgrounds/pin2.jpg">pin2</option>
-        <option value="backgrounds/pintrest1.jpg">pintrest1</option>
-        <option value="backgrounds/sage-hires.png">sage-hires</option>
-        <option value="backgrounds/sage-floral.jpg" selected>sage-floral (theme1)</option>
+        <option value="assets/backgrounds/pin2.jpg">pin2</option>
+        <option value="assets/backgrounds/pintrest1.jpg">pintrest1</option>
+        <option value="assets/backgrounds/sage-hires.png">sage-hires</option>
+        <option value="assets/backgrounds/sage-floral.jpg" selected>sage-floral (theme1)</option>
       </select>
     </label>
     <label style="justify-content:flex-start; gap:6px;">
@@ -1527,7 +1534,7 @@
       <!-- floating flower sprite, ported from theme1's sprig.png -- kept
            to the hero only, per the requested scope (see the .hero-sprite
            comment in <style> for why it's not reused site-wide). -->
-      <img class="hero-sprite" src="hero-sprig.png" alt="">
+      <img class="hero-sprite" src="assets/hero-sprig.png" alt="">
 
       <div class="card">
 

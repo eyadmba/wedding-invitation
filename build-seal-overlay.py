@@ -37,13 +37,13 @@ from PIL import Image, ImageFilter
 # ============================================================
 
 # The seal sprite to place. Must have a transparent background (RGBA).
-SEAL_SPRITE_PATH = "eb-wax-seal-transparent.png"
+SEAL_SPRITE_PATH = "assets/eb-wax-seal-transparent.png"
 
 # The envelope background photo -- only used to read its exact pixel size,
 # so the seal overlay canvas always matches it. Swap this file for a new
 # envelope design any time; this script will pick up its new dimensions
 # automatically.
-ENVELOPE_REFERENCE_PATH = "envelope-no-wax-seal.png"
+ENVELOPE_REFERENCE_PATH = "assets/envelope-no-wax-seal.png"
 
 # Where the seal's CENTER should land, in the envelope photo's own pixel
 # coordinates (top-left is 0,0). Increase Y to move it down, increase X to
@@ -59,8 +59,8 @@ TARGET_WIDTH = 190
 TARGET_HEIGHT = 195
 
 # Output files
-OUTPUT_PATH = "seal-overlay.png"
-PREVIEW_PATH = "preview.png"
+OUTPUT_PATH = "assets/seal-overlay.png"
+PREVIEW_PATH = "assets/preview.png"
 
 # ============================================================
 #  Script -- no need to edit below this line

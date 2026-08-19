@@ -30,8 +30,8 @@ import base64
 import re
 import sys
 
-MASK_TOP_PATH = "mask-top.png"
-MASK_BOTTOM_PATH = "mask-bottom.png"
+MASK_TOP_PATH = "assets/mask-top.png"
+MASK_BOTTOM_PATH = "assets/mask-bottom.png"
 HTML_PATH = "index.html"
 
 

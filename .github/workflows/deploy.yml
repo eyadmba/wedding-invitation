@@ -27,10 +27,7 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html _site/
-          cp envelope-no-wax-seal.png _site/
-          cp seal-overlay.png _site/
-          cp hero-sprig.png _site/
-          cp -r backgrounds _site/
+          cp -r assets _site/
           echo 'wedding.eyadarafat.com' > _site/CNAME
 
       - uses: actions/configure-pages@v5
