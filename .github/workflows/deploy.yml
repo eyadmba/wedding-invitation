@@ -30,6 +30,19 @@ jobs:
           cp -r assets _site/
           echo 'wedding.eyadarafat.com' > _site/CNAME
 
+          # Any top-level v<N>-<name>/ folder with its own index.html is a
+          # test site. It gets published under /staging/<folder>/ automatically
+          # -- no workflow changes needed when adding new ones.
+          mkdir -p _site/staging
+          shopt -s nullglob
+          for dir in v[0-9]*-*/; do
+            dir="${dir%/}"
+            if [ -f "$dir/index.html" ]; then
+              echo "Staging test site: $dir -> /staging/$dir/"
+              cp -r "$dir" "_site/staging/$dir"
+            fi
+          done
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
