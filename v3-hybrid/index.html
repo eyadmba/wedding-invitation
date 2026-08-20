@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="envelope-locked">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>اياد و بتول - دعوة لمن نحب</title>
+
+  <!-- Google Fonts: Complete Arabic Typography Suite -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa+Ink&family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=El+Messiri:wght@400;600;700&family=Fustat:wght@400;600;700&family=Gulzar&family=Harmattan&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Jomhuria&family=Katibeh&family=Lateef:wght@400;700&family=Mada:wght@400;600;700&family=Marhey:wght@400;700&family=Markazi+Text:wght@400;600;700&family=Mirza:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Qahiri&family=Rakkas&family=Reem+Kufi:wght@400;700&family=Scheherazade+New:wght@400;700&family=Tajawal:wght@400;500;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- 1. Envelope Preloader (Dismissed synchronously when cached) -->
+  <div id="loader">
+    <div class="loader-track">
+      <div class="loader-sweep"></div>
+    </div>
+  </div>
+
+  <!-- 2. Fullscreen Interactive Envelope Intro -->
+  <div id="envelope">
+    <div class="envelope-frame">
+      <div class="envelope-half envelope-top"></div>
+      <div class="envelope-half envelope-bottom"></div>
+      <div class="envelope-half envelope-seal"></div>
+    </div>
+    <span class="envelope-hint">اضغط لفتح الدعوة</span>
+  </div>
+
+  <!-- 3. Falling Leaves & Petals Ambient Canvas -->
+  <canvas id="petalCanvas"></canvas>
+
+  <!-- 4. Fixed Viewport Background Photo & Blend Overlay -->
+  <div class="bg-image"></div>
+  <div class="bg-overlay"></div>
+  <div class="bg-fixed">
+    <div class="bg-gradient"></div>
+  </div>
+
+  <!-- 5. Floating Design Lab Trigger & Drawer (Visible in ?edit mode) -->
+  <button id="labToggle" class="lab-toggle-btn" title="Design Lab">🎨</button>
+  <div id="designLabDrawer" class="design-lab-drawer" hidden></div>
+
+  <!-- 6. Main Content Cards -->
+  <main class="wrap">
+
+    <!-- Section 1: Hero / Main Announcement -->
+    <section class="page" id="hero">
+      <div class="card">
+        <p class="bismillah">بسم الله الرحمن الرحيم</p>
+
+        <div class="ornament">
+          <span class="line"></span>
+          <span class="mark">✦</span>
+          <span class="line"></span>
+        </div>
+
+        <p class="kicker" id="kickerText">دعوة لمن نحب</p>
+
+        <p class="verse">«وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً»</p>
+
+        <p class="lead">يتشرف كل من</p>
+
+        <div class="row fathers">
+          <span class="father">بكر محمد عرفات</span>
+          <span class="conn">و</span>
+          <span class="father">ابراهيم سعودي ابو خالد</span>
+        </div>
+
+        <p class="lead">بدعوتكم لحفل زفاف</p>
+
+        <div class="row names">
+          <span class="name">اياد</span>
+          <span class="conn">و</span>
+          <span class="name">بتول</span>
+        </div>
+
+        <div class="ornament">
+          <span class="line"></span>
+          <span class="mark">✦</span>
+          <span class="line"></span>
+        </div>
+
+        <p class="hero-date">الجمعة ٢٥ أيلول ٢٠٢٦ — الساعة السابعة مساءً</p>
+      </div>
+
+      <div class="footer-info">
+        <span>عدد المقاعد: <span id="seatCount">٢</span></span>
+        <span>أمسيتنا للكبار فقط؛ شاكرين لكم تفهّمكم</span>
+      </div>
+    </section>
+
+    <!-- Section 2: Timeline -->
+    <section class="page" id="timeline-section">
+      <div class="card">
+        <h2 class="section-title">مواعيد أمسيتنا</h2>
+
+        <ol class="timeline">
+          <li class="timeline-item">
+            <span class="timeline-time">٧:٠٠ مساءً</span>
+            <span class="timeline-label">الوصول</span>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-time">٨:٠٠ مساءً</span>
+            <span class="timeline-label">الزفة</span>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-time">٩:٠٠ مساءً</span>
+            <span class="timeline-label">حفل العشاء</span>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-time">١١:٠٠ مساءً</span>
+            <span class="timeline-label">ختام الحفل</span>
+          </li>
+        </ol>
+
+        <div class="ornament">
+          <span class="line"></span>
+          <span class="mark">✦</span>
+          <span class="line"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Location -->
+    <section class="page" id="location-section">
+      <div class="card">
+        <h2 class="section-title">الموقع</h2>
+
+        <div class="locations">
+          <div class="location-card">
+            <div class="location-head">
+              <h3>بيت العروس</h3>
+              <span class="location-time">٧:٠٠ مساءً</span>
+            </div>
+            <iframe loading="lazy" title="خريطة بيت العروس" src="https://www.google.com/maps?q=31.965863,35.847342&z=16&output=embed"></iframe>
+          </div>
+          <div class="location-card">
+            <div class="location-head">
+              <h3>نادي الملك حسين</h3>
+              <span class="location-time">٨:٠٠ مساءً</span>
+            </div>
+            <iframe loading="lazy" title="خريطة نادي الملك حسين" src="https://www.google.com/maps?q=31.950986864551023,35.921994920492764&z=16&output=embed"></iframe>
+          </div>
+        </div>
+
+        <div class="ornament">
+          <span class="line"></span>
+          <span class="mark">✦</span>
+          <span class="line"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: RSVP -->
+    <section class="page" id="rsvp-section">
+      <div class="card">
+        <h2 class="section-title">تأكيد الحضور</h2>
+
+        <p class="lead">يسعدنا تأكيد حضوركم قبل موعد الحفل</p>
+
+        <form class="rsvp-form" onsubmit="event.preventDefault(); alert('شكراً لكم! تم استلام تأكيد حضوركم.');">
+          <label class="rsvp-option">
+            <input type="radio" name="attendance" value="yes" checked>
+            <span>نعم، سنحضر بكل سرور</span>
+          </label>
+          <label class="rsvp-option">
+            <input type="radio" name="attendance" value="no">
+            <span>لا، لن نتمكن من الحضور</span>
+          </label>
+          <button type="submit" class="rsvp-submit">إرسال</button>
+        </form>
+
+        <div class="ornament">
+          <span class="line"></span>
+          <span class="mark">✦</span>
+          <span class="line"></span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modular Zero-Build Script Pipeline -->
+  <script src="js/guests.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/style-schema.js"></script>
+  <script src="js/design-lab.js"></script>
+</body>
+</html>

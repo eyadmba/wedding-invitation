@@ -59,14 +59,14 @@
        whichever row they sit in (see .fathers .conn / .names .conn). ---- */
     --title-color: #edf2e4;        /* shared section-title color (all sections) */
     --kicker-color: #f3ecd8;       /* hero's "دعوة لمن نحب" line */
-    --verse-color: rgba(243,236,216,0.85); /* hero's Quran verse line */
+    --verse-color: rgba(243,236,216,0.95); /* hero's Quran verse line */
     --names-color: #f3ecd8;        /* bride & groom names in the hero */
     --fathers-color: #f3ecd8;      /* the two fathers' names in the hero;
                                        both "و" connectors follow whichever
                                        of these two vars their own row uses */
-    --hero-secondary: rgba(243,236,216,0.7); /* hero's "يتشرف كل من" / "بدعوتكم" lines */
-    --hero-date-color: rgba(243,236,216,0.75); /* hero's date/time line */
-    --footer-color: rgba(243,236,216,0.88); /* hero's bottom-of-screen seat-count notice */
+    --hero-secondary: rgba(243,236,216,0.88); /* hero's "يتشرف كل من" / "بدعوتكم" lines */
+    --hero-date-color: rgba(243,236,216,0.9); /* hero's date/time line */
+    --footer-color: rgba(243,236,216,0.95); /* hero's bottom-of-screen seat-count notice */
 
     --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
     --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
@@ -76,7 +76,10 @@
        approximation -- see the elements that reference this below. */
     --hero-glow: 0 1px 18px oklch(25% .02 150 / .45);
 
-    --text-shadow-intensity: 0; /* 0 = no shadow (default); design-lab slider */
+    --text-shadow-intensity: 5; /* 0 = no shadow, 10 = max; design-lab slider.
+       Defaulted on (rather than 0) since light text over light/busy
+       backgrounds needs some lift to stay legible; still subtle at this
+       level -- see the .wrap comment below for how it's applied. */
 
     --ornament-mark-rotate: 0deg; /* the ornament's center glyph; only "square" needs 45deg (see ORNAMENT_MARKS) */
 
@@ -580,7 +583,7 @@
   }
 
   #hero{
-    position: relative; /* anchors .hero-sprite below */
+    position: relative; /* anchors .footer-info below */
     padding-left: 14px;
     padding-right: 14px;
     /* svh, not the shared .page lvh: .footer-info is pinned near the
@@ -592,28 +595,6 @@
        animating -- see the .page comment), so if the hero fits within it,
        it's on-screen immediately. */
     min-height: min(100svh, 900px);
-  }
-
-  /* ---- floating flower sprite, ported from the theme1 reference's
-     sprig.png -- there it decorates the plain sections *between* the busy
-     hero photo and the rest of the page; kept here scoped to the hero
-     alone per the requested scope, peeking from behind the card's top
-     corner with a slow drifting sway so it reads as alive rather than
-     pasted on. pointer-events:none so it never intercepts taps meant for
-     the card beneath it. ---- */
-  .hero-sprite{
-    position: absolute;
-    top: -18px;
-    right: 6%;
-    width: min(34vw, 150px);
-    z-index: 3;
-    pointer-events: none;
-    filter: drop-shadow(0 12px 20px rgba(20,34,20,0.25));
-    animation: hero-sprite-float 7s ease-in-out infinite;
-  }
-  @keyframes hero-sprite-float{
-    0%, 100% { transform: translateY(0) rotate(-2deg); }
-    50% { transform: translateY(-14px) rotate(2deg); }
   }
 
   /* one ornament color site-wide, deliberately its own var rather than
@@ -1444,7 +1425,7 @@
       <input type="text" id="petalColorHex" value="#a3813f" maxlength="7" style="width:58px;font-size:11px;padding:2px 3px;flex:0 0 auto;">
     </label>
     <label>Text shadow intensity
-      <input type="range" id="textShadowRange" min="0" max="10" value="0" style="width:105px;">
+      <input type="range" id="textShadowRange" min="0" max="10" value="5" style="width:105px;">
     </label>
    </details>
 
@@ -1471,10 +1452,11 @@
         <option value="assets/backgrounds/pintrest1.jpg">pintrest1</option>
         <option value="assets/backgrounds/sage-hires.png">sage-hires</option>
         <option value="assets/backgrounds/sage-floral.jpg" selected>sage-floral (theme1)</option>
+        <option value="assets/backgrounds/gemini-123123.jpg">gemini-123123</option>
       </select>
     </label>
     <label style="justify-content:flex-start; gap:6px;">
-      <input type="file" id="bgImageInput" accept="image/*" style="max-width:100%;">
+      <input type="file" id="bgImageInput" accept="image/*,.jfif" style="max-width:100%;">
     </label>
     <label>
       <button type="button" id="bgImageClear" style="width:100%; padding:4px 6px; font-size:12px; cursor:pointer; border-radius:5px; border:1px solid rgba(0,0,0,0.2); background:#fff;">Clear image</button>
@@ -1529,11 +1511,6 @@
 
     <!-- 1. hero / intro -->
     <section class="page" id="hero">
-
-      <!-- floating flower sprite, ported from theme1's sprig.png -- kept
-           to the hero only, per the requested scope (see the .hero-sprite
-           comment in <style> for why it's not reused site-wide). -->
-      <img class="hero-sprite" src="assets/hero-sprig.png" alt="">
 
       <div class="card">
 
