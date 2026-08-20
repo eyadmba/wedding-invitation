@@ -1,0 +1,44 @@
+name: Cleanup Workflow Runs
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          keep=6
+          cutoff=$(date -u -d '-7 days' +%s)
+
+          # All runs, newest first, across every workflow in the repo.
+          gh api "repos/$REPO/actions/runs" --paginate \
+            --jq '.workflow_runs[] | [.id, .created_at] | @tsv' \
+            > all_runs.tsv
+
+          total=$(wc -l < all_runs.tsv)
+          echo "Found $total workflow run(s)."
+
+          # Skip the newest $keep runs; only consider the rest for deletion.
+          tail -n "+$((keep + 1))" all_runs.tsv > candidates.tsv || true
+
+          while IFS=$'\t' read -r id created_at; do
+            [ -z "${id:-}" ] && continue
+            created_ts=$(date -u -d "$created_at" +%s)
+            if [ "$created_ts" -lt "$cutoff" ]; then
+              echo "Deleting run $id (created $created_at)"
+              gh api -X DELETE "repos/$REPO/actions/runs/$id" || true
+            fi
+          done < candidates.tsv
