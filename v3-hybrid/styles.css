@@ -1,24 +1,32 @@
 :root{
   /* ---- Design Lab knobs -- see js/style-schema.js for the full manifest;
      these are just the CSS-var side, applied live by js/design-lab.js ---- */
-  --bg-color: #f4efe3;
+  /* ---- background: ONE color knob does double duty (see js/style-schema.js
+     -- there's no separate "Overlay Color" anymore). `--bg-color` is
+     whatever alpha the design lab set it to, and is what actually paints
+     the tint layer above the background photo (see .bg-overlay below) --
+     leave its alpha at 0 for no tint, or raise it (with a blend mode other
+     than Normal) to tint the photo. `--bg-color-solid` is always the same
+     hex at full opacity regardless of that alpha -- it's what the flat
+     page canvas (--sky/--sky-deep/--sky-deepest below, and .bg-fixed's own
+     fallback) uses, so a half-transparent tint never leaves the page's
+     base color half-see-through too. JS sets both from the one knob
+     (design-lab.js applyKnobValue, the bgColor id special-case). */
+  --bg-color: rgba(244,239,227,0);
+  --bg-color-solid: #f4efe3;
   --bg-image: none;
   --bg-drift-max: 150px;
   --bg-position-y: 50%; /* where in the photo the crop starts, see .bg-image below */
-
-  /* background-image overlay: color + blend mode, layered above .bg-image
-     but below all page content. Fully transparent by default. */
-  --bg-overlay-color: rgba(0,0,0,0);
-  --bg-overlay-blend: normal;
+  --bg-blend-mode: normal;
 
   --card-bg: rgba(0,0,0,0);
   --card-blur: 0px;
   --font-display: 'Aref Ruqaa', serif;
   --font-body: 'Amiri', serif;
 
-  --sky: color-mix(in srgb, var(--bg-color) 100%, white 10%);
-  --sky-deep: var(--bg-color);
-  --sky-deepest: color-mix(in srgb, var(--bg-color) 100%, black 10%);
+  --sky: color-mix(in srgb, var(--bg-color-solid) 100%, white 10%);
+  --sky-deep: var(--bg-color-solid);
+  --sky-deepest: color-mix(in srgb, var(--bg-color-solid) 100%, black 10%);
 
   /* ---- functional color roles (consolidated) ----
      `--card-title-color` / `--card-text-color` are the shared "title" /
@@ -35,6 +43,8 @@
   --button-color: #edf2e4;
   --button-text-color: #556b2f;
   --ornament-color: #fff0d1; /* every section's ornament, deliberately its own var */
+  /* timeline-only knobs now (js/style-schema.js CARDS.timeline), not global
+     -- still their own vars since the loader sweep also borrows --accent-color. */
   --accent-color: #a3813f;       /* timeline line, loader sweep */
   --accent-color-deep: #8a6a30;  /* timeline dots, rsvp radio accent */
   --hairline: rgba(90,70,40,0.28);
@@ -71,15 +81,20 @@
   --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
   --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
 
-  /* the hero's glow, lifted verbatim from theme1's own .text-glow utility
-     (oklch(25% .02 150 / .45), 0 1px 18px) rather than an rgba
-     approximation -- see the elements that reference this below. */
-  --hero-glow: 0 1px 18px oklch(25% .02 150 / .45);
-
   --text-shadow-intensity: 5; /* 0 = no shadow, 10 = max; design-lab slider.
      Defaulted on (rather than 0) since light text over light/busy
      backgrounds needs some lift to stay legible; still subtle at this
-     level -- see the .wrap comment below for how it's applied. */
+     level -- see the .wrap comment below for how it's applied. This is now
+     the ONE shadow control for the entire site: the hero's glow below is
+     scaled off it too (rather than being a separate always-on effect), so
+     dragging it to 0 genuinely removes every text shadow, hero included. */
+
+  /* the hero's glow, lifted verbatim from theme1's own .text-glow utility
+     (oklch(25% .02 150 / .45), 0 1px 18px at the slider's default of 5) --
+     blur and alpha both scale linearly off --text-shadow-intensity so the
+     numbers land exactly on that reference at the default, 0 at the
+     slider's minimum, and stronger past it. */
+  --hero-glow: 0 1px calc(var(--text-shadow-intensity) * 3.6px) oklch(25% .02 150 / calc(var(--text-shadow-intensity) * 0.09));
 
   --ornament-mark-rotate: 0deg; /* the ornament's center glyph; only "square" needs 45deg */
 
@@ -233,7 +248,7 @@ html.envelope-locked, html.envelope-locked body{
   position: fixed;
   inset: 0;
   z-index: 10001;
-  background: var(--bg-color);
+  background: var(--bg-color-solid);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -314,19 +329,21 @@ body{
    but below the falling-leaves canvas/content (1/2). ---- */
 .bg-image{
   position: fixed;
-  /* height pinned to 100lvh (+ the drift buffer), NOT sized against the
-     live viewport -- see the design-lab.js comment on stableViewportHeight
-     for why: this box feeds `background-size: cover`, so any change to its
-     height re-crops the photo, and the address bar hiding mid-scroll would
-     otherwise cause a visible "skip". lvh is pinned and is the large/bars-
-     hidden viewport, so this is always at least as tall as the fully-
-     scrolled viewport. */
+  /* height/background-size below are just the pre-JS fallback (and last
+     resort if JS ever fails to run): effects.js's updateBgSizing() takes
+     over both as soon as it can, setting them as inline styles (which beat
+     these) computed from a JS-measured 100lvh probe rather than a raw CSS
+     `calc(100lvh + ...)` -- see that function's comment for why a live
+     calc() here was leaving a stale/short box on first paint in some
+     engines (the "white bar at the bottom" bug), and why plain
+     `background-size: cover` alone could leave the crop-position slider
+     with ~0px of vertical room to move on portrait photos/viewports. */
   top: 0; left: 0; right: 0;
   height: calc(100lvh + var(--bg-drift-max));
   z-index: -1;
   background-image: var(--bg-image, none);
   background-size: cover;
-  /* the design lab's "Start position" slider -- under cover, 0% anchors
+  /* the design lab's "Crop Position Y" slider -- under cover, 0% anchors
      the photo's top edge to the box's top (the old fixed "top center"),
      100% anchors its bottom edge instead, so this is where the crop
      *starts*; the scroll drift below then moves it further down from
@@ -337,16 +354,17 @@ body{
   pointer-events: none;
 }
 
-/* ---- background overlay: color + blend-mode layer over the background
-   photo, above it but below all page content (petals canvas + .wrap).
-   Fully transparent by default -- this is the "Background Overlay" global
-   knob (see js/style-schema.js), replacing the old "Stars" decoration. ---- */
+/* ---- background overlay: the SAME --bg-color knob (see the :root comment
+   above), painted as a blend-mode layer over the background photo -- above
+   it but below all page content (petals canvas + .wrap). No separate
+   overlay color: transparent by default (alpha 0), it only tints the photo
+   once the design lab raises its alpha above 0. ---- */
 .bg-overlay{
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: var(--bg-overlay-color);
-  mix-blend-mode: var(--bg-overlay-blend);
+  background: var(--bg-color);
+  mix-blend-mode: var(--bg-blend-mode);
   pointer-events: none;
 }
 
@@ -444,7 +462,19 @@ html.card-on .card{
   padding-bottom: clamp(68px, 9.5vh, 88px);
 }
 #hero .card{
-  gap: clamp(14px, 2.4vh, 22px);
+  gap: clamp(16px, 2.8vh, 26px);
+}
+
+/* small hairline breather for the hero's densest stretch (between the two
+   fathers' names and the couple's own names) -- same gradient treatment as
+   .ornament .line, just without a center glyph, so it reads as a quieter
+   divider rather than another full ornament. */
+.hero-divider{
+  width: 64px;
+  height: 1px;
+  margin: 2px 0;
+  background: linear-gradient(90deg, transparent, var(--ornament-color), transparent);
+  opacity: 0.6;
 }
 
 /* one ornament color site-wide, deliberately its own var rather than

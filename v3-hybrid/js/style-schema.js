@@ -64,10 +64,14 @@
 
   // ---- GLOBAL_KNOBS ----
   var GLOBAL_KNOBS = [
-    // Background & Overlay
-    { id: 'bgColor', label: 'Background Color', type: 'color', cssVar: '--bg-color', default: '#f4efe3', defaultAlpha: 100, group: 'Background' },
-    { id: 'bgOverlayColor', label: 'Overlay Color', type: 'color', cssVar: '--bg-overlay-color', default: '#000000', defaultAlpha: 0, group: 'Background' },
-    { id: 'bgOverlayBlend', label: 'Overlay Blend Mode', type: 'select', cssVar: '--bg-overlay-blend', options: BLEND_MODES, default: 'normal', group: 'Background' },
+    // Background: one color (with its own alpha) doubles as both the flat
+    // page color AND the tint/overlay over the background photo -- see the
+    // --bg-color-solid / --bg-color split in styles.css. There's no
+    // separate "Overlay Color" knob anymore: set a blend mode and a
+    // non-transparent alpha here to tint the photo, or leave alpha at 0 for
+    // no tint at all.
+    { id: 'bgColor', label: 'Background Color', type: 'color', cssVar: '--bg-color', default: '#f4efe3', defaultAlpha: 0, group: 'Background' },
+    { id: 'bgBlendMode', label: 'Background Blend Mode', type: 'select', cssVar: '--bg-blend-mode', options: BLEND_MODES, default: 'normal', group: 'Background' },
     { id: 'bgImage', label: 'Background Image', type: 'bgImage', cssVar: '--bg-image', presets: BG_PRESETS, default: 'assets/backgrounds/sage-floral.jpg', group: 'Background' },
     { id: 'bgPositionY', label: 'Crop Position Y', type: 'range', cssVar: '--bg-position-y', min: 0, max: 100, default: 50, unit: '%', group: 'Background' },
     { id: 'bgParallax', label: 'Parallax Scroll Drift', type: 'range', cssVar: '--bg-drift-max', min: 0, max: 150, default: 150, unit: 'px', group: 'Background' },
@@ -78,8 +82,6 @@
     { id: 'buttonColor', label: 'Button Background', type: 'color', cssVar: '--button-color', default: '#edf2e4', defaultAlpha: 100, group: 'Colors' },
     { id: 'buttonTextColor', label: 'Button Text Color', type: 'color', cssVar: '--button-text-color', default: '#556b2f', defaultAlpha: 100, group: 'Colors' },
     { id: 'ornamentColor', label: 'Ornament & Accent Color', type: 'color', cssVar: '--ornament-color', default: '#fff0d1', defaultAlpha: 100, group: 'Colors' },
-    { id: 'accentColor', label: 'Timeline Line (Light)', type: 'color', cssVar: '--accent-color', default: '#a3813f', defaultAlpha: 100, group: 'Colors' },
-    { id: 'accentColorDeep', label: 'Timeline Dot (Deep)', type: 'color', cssVar: '--accent-color-deep', default: '#8a6a30', defaultAlpha: 100, group: 'Colors' },
 
     // Fonts & Sizing
     { id: 'displayFont', label: 'Display Font (Titles)', type: 'font', cssVar: '--font-display', options: FONT_OPTIONS, default: "'Aref Ruqaa', serif", group: 'Fonts' },
@@ -134,6 +136,8 @@
       label: 'Timeline Section',
       icon: '⏳',
       knobs: [
+        { id: 'accentColor', label: 'Timeline Line (Light)', type: 'color', cssVar: '--accent-color', default: '#a3813f', defaultAlpha: 100 },
+        { id: 'accentColorDeep', label: 'Timeline Dot (Deep)', type: 'color', cssVar: '--accent-color-deep', default: '#8a6a30', defaultAlpha: 100 },
         { id: 'sectionTitleColor', label: 'Section Title Color', type: 'color', cssVar: '--timeline-title-color', overrides: 'cardTitleColor', default: '#edf2e4', defaultAlpha: 100 },
         { id: 'hourTextColor', label: 'Hour Text Color', type: 'color', cssVar: '--timeline-hour-color', overrides: 'cardTextColor', default: '#edf2e4', defaultAlpha: 100 },
         { id: 'labelTextColor', label: 'Label Text Color', type: 'color', cssVar: '--timeline-label-color', overrides: 'cardTextColor', default: '#556b2f', defaultAlpha: 100 }
@@ -171,9 +175,8 @@
       label: 'Sage & Gold (Default)',
       state: {
         global: {
-          bgColor: { hex: '#f4efe3', alpha: 100 },
-          bgOverlayColor: { hex: '#000000', alpha: 0 },
-          bgOverlayBlend: 'normal',
+          bgColor: { hex: '#f4efe3', alpha: 0 },
+          bgBlendMode: 'normal',
           bgImage: { preset: 'assets/backgrounds/sage-floral.jpg', dataUrl: null },
           bgPositionY: 50,
           bgParallax: 150,
@@ -182,8 +185,6 @@
           buttonColor: { hex: '#edf2e4', alpha: 100 },
           buttonTextColor: { hex: '#556b2f', alpha: 100 },
           ornamentColor: { hex: '#fff0d1', alpha: 100 },
-          accentColor: { hex: '#a3813f', alpha: 100 },
-          accentColorDeep: { hex: '#8a6a30', alpha: 100 },
           displayFont: "'Aref Ruqaa', serif",
           bodyFont: "'Amiri', serif",
           textScale: 100,
@@ -224,6 +225,8 @@
           },
           timeline: {
             values: {
+              accentColor: { hex: '#a3813f', alpha: 100 },
+              accentColorDeep: { hex: '#8a6a30', alpha: 100 },
               sectionTitleColor: { hex: '#edf2e4', alpha: 100 },
               hourTextColor: { hex: '#edf2e4', alpha: 100 },
               labelTextColor: { hex: '#556b2f', alpha: 100 }
@@ -266,9 +269,8 @@
       label: 'Classic Burgundy & Ivory',
       state: {
         global: {
-          bgColor: { hex: '#361118', alpha: 100 },
-          bgOverlayColor: { hex: '#361118', alpha: 15 },
-          bgOverlayBlend: 'multiply',
+          bgColor: { hex: '#361118', alpha: 15 },
+          bgBlendMode: 'multiply',
           bgImage: { preset: 'assets/backgrounds/pin2.jpg', dataUrl: null },
           bgPositionY: 30,
           bgParallax: 100,
@@ -277,8 +279,6 @@
           buttonColor: { hex: '#6B1D2F', alpha: 100 },
           buttonTextColor: { hex: '#ffffff', alpha: 100 },
           ornamentColor: { hex: '#d4af37', alpha: 100 },
-          accentColor: { hex: '#C5A059', alpha: 100 },
-          accentColorDeep: { hex: '#6B1D2F', alpha: 100 },
           displayFont: "'Aref Ruqaa', serif",
           bodyFont: "'El Messiri', sans-serif",
           textScale: 100,
@@ -319,6 +319,8 @@
           },
           timeline: {
             values: {
+              accentColor: { hex: '#C5A059', alpha: 100 },
+              accentColorDeep: { hex: '#6B1D2F', alpha: 100 },
               sectionTitleColor: { hex: '#fdfbf7', alpha: 100 },
               hourTextColor: { hex: '#fdfbf7', alpha: 100 },
               labelTextColor: { hex: '#e4b679', alpha: 100 }
@@ -361,9 +363,8 @@
       label: 'Emerald & Champagne',
       state: {
         global: {
-          bgColor: { hex: '#0a1a12', alpha: 100 },
-          bgOverlayColor: { hex: '#0a1a12', alpha: 35 },
-          bgOverlayBlend: 'multiply',
+          bgColor: { hex: '#0a1a12', alpha: 35 },
+          bgBlendMode: 'multiply',
           bgImage: { preset: 'assets/backgrounds/sage-hires.png', dataUrl: null },
           bgPositionY: 50,
           bgParallax: 120,
@@ -372,8 +373,6 @@
           buttonColor: { hex: '#c5a059', alpha: 100 },
           buttonTextColor: { hex: '#112217', alpha: 100 },
           ornamentColor: { hex: '#f5eedb', alpha: 100 },
-          accentColor: { hex: '#c5a059', alpha: 100 },
-          accentColorDeep: { hex: '#2b533b', alpha: 100 },
           displayFont: "'Aref Ruqaa', serif",
           bodyFont: "'Amiri', serif",
           textScale: 100,
@@ -414,6 +413,8 @@
           },
           timeline: {
             values: {
+              accentColor: { hex: '#c5a059', alpha: 100 },
+              accentColorDeep: { hex: '#2b533b', alpha: 100 },
               sectionTitleColor: { hex: '#f5eedb', alpha: 100 },
               hourTextColor: { hex: '#f5eedb', alpha: 100 },
               labelTextColor: { hex: '#a5c4ab', alpha: 100 }
@@ -456,9 +457,8 @@
       label: 'Minimalist Pearl & Charcoal',
       state: {
         global: {
-          bgColor: { hex: '#f7f4ed', alpha: 100 },
-          bgOverlayColor: { hex: '#f7f4ed', alpha: 0 },
-          bgOverlayBlend: 'normal',
+          bgColor: { hex: '#f7f4ed', alpha: 0 },
+          bgBlendMode: 'normal',
           bgImage: { preset: '', dataUrl: null },
           bgPositionY: 50,
           bgParallax: 0,
@@ -467,8 +467,6 @@
           buttonColor: { hex: '#2b2b28', alpha: 100 },
           buttonTextColor: { hex: '#ffffff', alpha: 100 },
           ornamentColor: { hex: '#8a7960', alpha: 100 },
-          accentColor: { hex: '#a89980', alpha: 100 },
-          accentColorDeep: { hex: '#8a7960', alpha: 100 },
           displayFont: "'Aref Ruqaa', serif",
           bodyFont: "'Amiri', serif",
           textScale: 100,
@@ -509,6 +507,8 @@
           },
           timeline: {
             values: {
+              accentColor: { hex: '#a89980', alpha: 100 },
+              accentColorDeep: { hex: '#8a7960', alpha: 100 },
               sectionTitleColor: { hex: '#222220', alpha: 100 },
               hourTextColor: { hex: '#222220', alpha: 100 },
               labelTextColor: { hex: '#66665e', alpha: 100 }
@@ -551,9 +551,8 @@
       label: 'Midnight Sapphire & Gold',
       state: {
         global: {
-          bgColor: { hex: '#0b1326', alpha: 100 },
-          bgOverlayColor: { hex: '#0b1326', alpha: 45 },
-          bgOverlayBlend: 'multiply',
+          bgColor: { hex: '#0b1326', alpha: 45 },
+          bgBlendMode: 'multiply',
           bgImage: { preset: 'assets/backgrounds/pintrest1.jpg', dataUrl: null },
           bgPositionY: 40,
           bgParallax: 140,
@@ -562,8 +561,6 @@
           buttonColor: { hex: '#c5a059', alpha: 100 },
           buttonTextColor: { hex: '#0b1326', alpha: 100 },
           ornamentColor: { hex: '#ffd700', alpha: 100 },
-          accentColor: { hex: '#ffd700', alpha: 100 },
-          accentColorDeep: { hex: '#1d3557', alpha: 100 },
           displayFont: "'Aref Ruqaa', serif",
           bodyFont: "'Amiri', serif",
           textScale: 100,
@@ -604,6 +601,8 @@
           },
           timeline: {
             values: {
+              accentColor: { hex: '#ffd700', alpha: 100 },
+              accentColorDeep: { hex: '#1d3557', alpha: 100 },
               sectionTitleColor: { hex: '#fff5df', alpha: 100 },
               hourTextColor: { hex: '#fff5df', alpha: 100 },
               labelTextColor: { hex: '#8da4c4', alpha: 100 }

@@ -177,15 +177,56 @@
     animatePetals();
   })();
 
-  // ---- 4. Parallax Background Scroll Drift ----
+  // ---- 4. Parallax Background Scroll Drift + Sizing ----
   (function initBackgroundDrift() {
     const bgImageEl = document.querySelector('.bg-image');
     if (!bgImageEl) return;
 
-    // Viewport probe to avoid mobile address bar jitter
+    // Viewport probes to avoid mobile address bar jitter (svh: guaranteed-
+    // visible height, used for the scroll-fraction math below; lvh: the
+    // large/bars-hidden height, used for the box's own size -- matches what
+    // the CSS fallback uses, but read here in JS and set as an inline style
+    // instead of leaving it to a live `calc(100lvh + ...)`. That raw calc()
+    // was occasionally painting stale/short on first load in some engines
+    // (a "white bar" at the very bottom of the viewport until *any* other
+    // style recalculation forced a repaint, e.g. nudging the Parallax
+    // slider) -- measuring once in JS and re-measuring on load/resize/fonts
+    // is the robust version of the same fix.
     const svhProbe = document.createElement('div');
     svhProbe.style.cssText = 'position:absolute;visibility:hidden;height:100svh;width:0;top:0;pointer-events:none;';
-    document.body.appendChild(svhProbe);
+    const lvhProbe = document.createElement('div');
+    lvhProbe.style.cssText = 'position:absolute;visibility:hidden;height:100lvh;width:0;top:0;pointer-events:none;';
+    document.body.append(svhProbe, lvhProbe);
+
+    let naturalImg = { w: 0, h: 0 };
+    // How much extra vertical room the crop-position slider is guaranteed
+    // to have to pan through, on top of whatever `cover` already needs.
+    // Without this, a portrait photo on a narrow/tall (mobile) viewport can
+    // land exactly height-constrained under plain `cover` -- image height
+    // matches the box height with zero slack left over, so the "Crop
+    // Position Y" slider has nothing to move and visibly does nothing.
+    const MIN_PAN_RATIO = 1.3;
+
+    function boxHeight() {
+      const rawMax = getComputedStyle(document.documentElement).getPropertyValue('--bg-drift-max');
+      const driftMax = parseFloat(rawMax) || 0;
+      const lvh = lvhProbe.getBoundingClientRect().height || window.innerHeight;
+      return lvh + driftMax;
+    }
+
+    function updateBgSizing() {
+      const boxW = window.innerWidth;
+      const boxH = boxHeight();
+      bgImageEl.style.height = `${boxH}px`;
+      if (!naturalImg.w || !naturalImg.h) {
+        bgImageEl.style.backgroundSize = 'cover';
+        return;
+      }
+      const coverScale = Math.max(boxW / naturalImg.w, boxH / naturalImg.h);
+      const panScale = (boxH * MIN_PAN_RATIO) / naturalImg.h;
+      const scale = Math.max(coverScale, panScale);
+      bgImageEl.style.backgroundSize = `${naturalImg.w * scale}px ${naturalImg.h * scale}px`;
+    }
 
     function updateDrift() {
       const rawMax = getComputedStyle(document.documentElement).getPropertyValue('--bg-drift-max');
@@ -196,9 +237,27 @@
       bgImageEl.style.transform = `translateY(${-(fraction * bgDriftMax)}px)`;
     }
 
+    function refreshAll() {
+      updateBgSizing();
+      updateDrift();
+    }
+
     window.addEventListener('scroll', updateDrift, { passive: true });
-    window.addEventListener('resize', updateDrift, { passive: true });
-    updateDrift();
+    window.addEventListener('resize', refreshAll, { passive: true });
+    // Fonts/images/iframes finishing after the initial synchronous run can
+    // grow the page (or change the measured viewport probes) -- re-measure
+    // once things settle rather than only reacting to user-driven events.
+    window.addEventListener('load', refreshAll);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(refreshAll).catch(() => {});
+    }
+    refreshAll();
+
+    global.WeddingEffects = global.WeddingEffects || {};
+    global.WeddingEffects.setBgImageNaturalSize = function (w, h) {
+      naturalImg = { w: w || 0, h: h || 0 };
+      updateBgSizing();
+    };
   })();
 
   // Public effect controls

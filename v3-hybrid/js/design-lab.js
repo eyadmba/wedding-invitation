@@ -82,9 +82,60 @@
 
   function setState(obj) {
     state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-    deepMerge(state, obj || {});
+    deepMerge(state, migrateLegacyState(obj || {}));
+    sanitizeState();
     applyAll();
     rebuildPanel();
+  }
+
+  // Reshapes state saved under an older schema (localStorage, a saved user
+  // theme, or a pasted Import/Export blob) into the current one, in place,
+  // before it gets merged over the fresh defaults. Without this, an old
+  // save's separate bgColor (opaque, alpha 100) + bgOverlayColor (the actual
+  // tint) collapse into just bgColor at alpha 100 -- now that bgColor alone
+  // also paints the overlay (see the --bg-color-solid comment in
+  // styles.css), that reads as a fully opaque layer permanently covering
+  // whatever background photo is picked afterwards. No-ops on already
+  // current-shaped state (nothing to rename/fold), so it's safe to run on
+  // every load, including the shared built-in theme objects.
+  function migrateLegacyState(obj) {
+    var g = obj && obj.global;
+    if (!g) return obj;
+    if (g.bgOverlayColor) {
+      g.bgColor = { hex: g.bgOverlayColor.hex, alpha: g.bgOverlayColor.alpha };
+      delete g.bgOverlayColor;
+    }
+    if (g.bgOverlayBlend !== undefined) {
+      g.bgBlendMode = g.bgOverlayBlend;
+      delete g.bgOverlayBlend;
+    }
+    if (g.accentColor || g.accentColorDeep) {
+      obj.cards = obj.cards || {};
+      obj.cards.timeline = obj.cards.timeline || {};
+      obj.cards.timeline.values = obj.cards.timeline.values || {};
+      if (g.accentColor && obj.cards.timeline.values.accentColor === undefined) obj.cards.timeline.values.accentColor = g.accentColor;
+      if (g.accentColorDeep && obj.cards.timeline.values.accentColorDeep === undefined) obj.cards.timeline.values.accentColorDeep = g.accentColorDeep;
+      delete g.accentColor;
+      delete g.accentColorDeep;
+    }
+    return obj;
+  }
+
+  // Guards against state (localStorage, or a pasted/saved theme) referencing
+  // a background preset that no longer exists in Schema.BG_PRESETS -- e.g. a
+  // theme saved back when this asset still had its original .jfif extension,
+  // before the file on disk was renamed to .jpg. Without this, that state
+  // just keeps pointing at a 404 forever (a plain filename, not a data URL,
+  // so there's nothing to fall back to visually). Known renames are mapped
+  // straight across; anything else unrecognized falls back to the default.
+  var KNOWN_BG_RENAMES = { 'assets/backgrounds/gemini-123123.jfif': 'assets/backgrounds/gemini-123123.jpg' };
+  function sanitizeState() {
+    var bg = state.global.bgImage;
+    if (!bg || bg.dataUrl || !bg.preset) return;
+    if (Schema.BG_PRESETS.some(function (p) { return p.value === bg.preset; })) return;
+    var remapped = KNOWN_BG_RENAMES[bg.preset];
+    var remappedKnown = remapped && Schema.BG_PRESETS.some(function (p) { return p.value === remapped; });
+    state.global.bgImage = { preset: remappedKnown ? remapped : DEFAULT_STATE.global.bgImage.preset, dataUrl: null };
   }
 
   // ==================================================================
@@ -104,6 +155,11 @@
     switch (knob.type) {
       case 'color':
         if (knob.cssVar) root.style.setProperty(knob.cssVar, rgba(value.hex, value.alpha));
+        // bgColor does double duty (flat page color + photo tint/overlay --
+        // see the --bg-color-solid comment in styles.css), so it also needs
+        // an always-opaque companion var for the flat/gradient side of that
+        // split, independent of whatever alpha the tint side is set to.
+        if (knob.id === 'bgColor') root.style.setProperty('--bg-color-solid', rgba(value.hex, 100));
         break;
       case 'colorNoAlpha':
         if (knob.cssVar) root.style.setProperty(knob.cssVar, value);
@@ -139,6 +195,16 @@
   function applyBgImage(value) {
     var url = value && value.dataUrl ? value.dataUrl : (value && value.preset ? value.preset : '');
     root.style.setProperty('--bg-image', url ? "url('" + url + "')" : 'none');
+    // Effects.js sizes/crops the background itself (see its "guaranteed pan
+    // room" comment) rather than leaving it to a plain `background-size:
+    // cover`, so it needs the image's real pixel dimensions -- hand them
+    // over once loaded, and clear them out for "no image".
+    if (!global.WeddingEffects || !global.WeddingEffects.setBgImageNaturalSize) return;
+    if (!url) { global.WeddingEffects.setBgImageNaturalSize(0, 0); return; }
+    var probe = new Image();
+    probe.onload = function () { global.WeddingEffects.setBgImageNaturalSize(probe.naturalWidth, probe.naturalHeight); };
+    probe.onerror = function () { global.WeddingEffects.setBgImageNaturalSize(0, 0); };
+    probe.src = url;
   }
 
   function applyToggle(knob, value) {
@@ -197,71 +263,50 @@
     if (state.global.ornamentColor && state.global.ornamentColor.hex) paletteAccent = state.global.ornamentColor.hex;
   }
 
+  // Exactly two spray buckets, sitewide: "Card Titles" and "All Text" (see
+  // js/style-schema.js knob comments for the full per-section breakdown).
+  // Buttons, ornaments/accents and the timeline's own line/dot colors are
+  // deliberately untouched by either bucket -- those stay one-off knobs in
+  // their own accordion rows.
   function batchApplyColor(target, hexColor) {
     if (!hexColor) return;
     var g = state.global;
     var h = state.cards.hero.values;
+    var tl = state.cards.timeline.values;
+    var loc = state.cards.location.values;
+    var rsvp = state.cards.rsvp.values;
 
     switch (target) {
       case 'all-titles':
+        // hero: the kicker ("دعوة لمن نحب") only; timeline/location/rsvp:
+        // the shared section heading (falls back to cardTitleColor when its
+        // own override isn't enabled, so this stays in sync either way).
         g.cardTitleColor.hex = hexColor;
         h.kickerColor.hex = hexColor;
-        applyKnobValue(GLOBAL_KNOBS.find(function (k) { return k.id === 'cardTitleColor'; }), g.cardTitleColor);
-        applyKnobValue(CARDS.find(function (c) { return c.id === 'hero'; }).knobs.find(function (k) { return k.id === 'kickerColor'; }), h.kickerColor);
-        break;
-
-      case 'all-main-text':
-        g.cardTextColor.hex = hexColor;
-        h.verseColor.hex = hexColor;
-        h.couplesColor.hex = hexColor;
-        h.fathersColor.hex = hexColor;
-        h.heroDateColor.hex = hexColor;
-        applyAll();
-        break;
-
-      case 'hero-names':
-        h.couplesColor.hex = hexColor;
-        h.fathersColor.hex = hexColor;
-        applyAll();
-        break;
-
-      case 'buttons':
-        g.buttonColor.hex = hexColor;
-        applyKnobValue(GLOBAL_KNOBS.find(function (k) { return k.id === 'buttonColor'; }), g.buttonColor);
-        break;
-
-      case 'button-text':
-        g.buttonTextColor.hex = hexColor;
-        applyKnobValue(GLOBAL_KNOBS.find(function (k) { return k.id === 'buttonTextColor'; }), g.buttonTextColor);
-        break;
-
-      case 'secondary-text':
-        g.cardTextColor.hex = hexColor;
-        h.heroSecondaryColor.hex = hexColor;
-        h.footerColor.hex = hexColor;
-        applyAll();
-        break;
-
-      case 'accents':
-        g.ornamentColor.hex = hexColor;
-        g.leafColor = hexColor;
-        g.petalColor = hexColor;
-        h.bismillahColor.hex = hexColor;
+        tl.sectionTitleColor.hex = hexColor;
+        loc.sectionTitleColor.hex = hexColor;
+        rsvp.sectionTitleColor.hex = hexColor;
         applyAll();
         break;
 
       case 'all-text':
-        g.cardTitleColor.hex = hexColor;
+        // hero: everything except the kicker; timeline: both time points;
+        // location: both the location title and its time; rsvp: the
+        // question and the radio answers, but NOT the submit button.
         g.cardTextColor.hex = hexColor;
-        g.buttonColor.hex = hexColor;
         h.bismillahColor.hex = hexColor;
-        h.kickerColor.hex = hexColor;
         h.verseColor.hex = hexColor;
         h.couplesColor.hex = hexColor;
         h.fathersColor.hex = hexColor;
         h.heroSecondaryColor.hex = hexColor;
         h.heroDateColor.hex = hexColor;
         h.footerColor.hex = hexColor;
+        tl.hourTextColor.hex = hexColor;
+        tl.labelTextColor.hex = hexColor;
+        loc.venueNameColor.hex = hexColor;
+        loc.venueTimeColor.hex = hexColor;
+        rsvp.questionColor.hex = hexColor;
+        rsvp.answerColor.hex = hexColor;
         applyAll();
         break;
     }
@@ -499,14 +544,12 @@
 
     var select = el('select', { class: 'palette-select' }, [
       el('option', { value: '', text: '⚡ Quick Spray Actions...' }),
-      el('option', { value: 'p:all-titles', text: 'Apply [P] to All Card Titles' }),
-      el('option', { value: 'p:all-main-text', text: 'Apply [P] to Main Verse & Names' }),
-      el('option', { value: 'p:hero-names', text: 'Apply [P] to Hero Names & Fathers' }),
-      el('option', { value: 'p:buttons', text: 'Apply [P] to Button Backgrounds' }),
-      el('option', { value: 'p:all-text', text: 'Apply [P] to ALL Text (Global)' }),
-      el('option', { value: 's:secondary-text', text: 'Apply [S] to Subtext & Dates' }),
-      el('option', { value: 's:button-text', text: 'Apply [S] to Button Text' }),
-      el('option', { value: 'a:accents', text: 'Apply [A] to Ornaments & Canvas' })
+      el('option', { value: 'p:all-titles', text: 'Apply [P] to Card Titles' }),
+      el('option', { value: 's:all-titles', text: 'Apply [S] to Card Titles' }),
+      el('option', { value: 'a:all-titles', text: 'Apply [A] to Card Titles' }),
+      el('option', { value: 'p:all-text', text: 'Apply [P] to All Text' }),
+      el('option', { value: 's:all-text', text: 'Apply [S] to All Text' }),
+      el('option', { value: 'a:all-text', text: 'Apply [A] to All Text' })
     ]);
 
     var applyBtn = el('button', { type: 'button', text: 'Apply', class: 'palette-apply-btn' });
@@ -823,7 +866,7 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return false;
       var obj = JSON.parse(raw);
-      deepMerge(state, obj);
+      deepMerge(state, migrateLegacyState(obj));
       return true;
     } catch (e) { return false; }
   }
@@ -845,6 +888,7 @@
   }
 
   loadSavedState();
+  sanitizeState();
   applyAll();
   rebuildPanel();
 
