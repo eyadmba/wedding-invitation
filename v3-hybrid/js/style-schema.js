@@ -42,7 +42,7 @@
     { value: 'assets/backgrounds/pin2.jpg', label: 'Pin 2 (Warm Paper)' },
     { value: 'assets/backgrounds/pintrest1.jpg', label: 'Pintrest 1 (Botanical)' },
     { value: 'assets/backgrounds/sage-hires.png', label: 'Sage Hi-Res (Texture)' },
-    { value: 'assets/backgrounds/CLub.jpg', label: 'King Hussein Club' },
+    { value: 'assets/backgrounds/Club.jpg', label: 'King Hussein Club' },
     { value: 'assets/backgrounds/gemini-123123.jpg', label: 'Gemini 123123' }
   ];
 
