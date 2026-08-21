@@ -177,21 +177,31 @@
     animatePetals();
   })();
 
-  // ---- 4. Parallax Background Scroll Drift + Sizing ----
-  (function initBackgroundDrift() {
+  // ---- 4. Background Sizing + Scroll Pan ----
+  // The background is never allowed to "run out": rather than a plain
+  // `background-size: cover` (which can leave zero vertical slack on a
+  // portrait photo/viewport pairing) plus a pixel `transform`, this scales
+  // the photo up (forcibly, past what `cover` alone needs, if the source is
+  // too short) so there's always at least --bg-drift-max px of pure
+  // vertical slack beyond the viewport, then pans through that slack purely
+  // via `background-position-y` percentages. Percentages are already
+  // defined relative to *whatever* slack currently exists (0% = image top
+  // flush with the box top, 100% = image bottom flush with the box bottom)
+  // -- so blending from the Crop Position Y slider's anchor up to 100% as
+  // the page scrolls can mathematically never expose the flat color behind
+  // it, no matter how much slack the anchor already ate into, or how
+  // aggressively the image had to be zoomed to get any slack at all.
+  (function initBackgroundPan() {
     const bgImageEl = document.querySelector('.bg-image');
     if (!bgImageEl) return;
 
     // Viewport probes to avoid mobile address bar jitter (svh: guaranteed-
     // visible height, used for the scroll-fraction math below; lvh: the
-    // large/bars-hidden height, used for the box's own size -- matches what
-    // the CSS fallback uses, but read here in JS and set as an inline style
-    // instead of leaving it to a live `calc(100lvh + ...)`. That raw calc()
-    // was occasionally painting stale/short on first load in some engines
-    // (a "white bar" at the very bottom of the viewport until *any* other
-    // style recalculation forced a repaint, e.g. nudging the Parallax
-    // slider) -- measuring once in JS and re-measuring on load/resize/fonts
-    // is the robust version of the same fix.
+    // large/bars-hidden height, used for the box's own size -- read here in
+    // JS and set as an inline style rather than left to a live CSS
+    // `100lvh`, which was occasionally painting stale/short on first load
+    // in some engines; measuring once in JS and re-measuring on
+    // load/resize/fonts is the robust version of the same fix).
     const svhProbe = document.createElement('div');
     svhProbe.style.cssText = 'position:absolute;visibility:hidden;height:100svh;width:0;top:0;pointer-events:none;';
     const lvhProbe = document.createElement('div');
@@ -199,50 +209,62 @@
     document.body.append(svhProbe, lvhProbe);
 
     let naturalImg = { w: 0, h: 0 };
-    // How much extra vertical room the crop-position slider is guaranteed
-    // to have to pan through, on top of whatever `cover` already needs.
-    // Without this, a portrait photo on a narrow/tall (mobile) viewport can
-    // land exactly height-constrained under plain `cover` -- image height
-    // matches the box height with zero slack left over, so the "Crop
-    // Position Y" slider has nothing to move and visibly does nothing.
-    const MIN_PAN_RATIO = 1.3;
 
     function boxHeight() {
-      const rawMax = getComputedStyle(document.documentElement).getPropertyValue('--bg-drift-max');
-      const driftMax = parseFloat(rawMax) || 0;
-      const lvh = lvhProbe.getBoundingClientRect().height || window.innerHeight;
-      return lvh + driftMax;
+      return lvhProbe.getBoundingClientRect().height || window.innerHeight;
+    }
+
+    function driftMaxPx() {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--bg-drift-max');
+      return parseFloat(raw) || 0;
     }
 
     function updateBgSizing() {
-      const boxW = window.innerWidth;
       const boxH = boxHeight();
       bgImageEl.style.height = `${boxH}px`;
       if (!naturalImg.w || !naturalImg.h) {
         bgImageEl.style.backgroundSize = 'cover';
         return;
       }
+      const boxW = window.innerWidth;
       const coverScale = Math.max(boxW / naturalImg.w, boxH / naturalImg.h);
-      const panScale = (boxH * MIN_PAN_RATIO) / naturalImg.h;
-      const scale = Math.max(coverScale, panScale);
+      // Guarantee at least driftMaxPx of real slack beyond the box, even if
+      // that means zooming in well past what `cover` needs on its own --
+      // soft/upscaled on a too-small source, but never short of the
+      // viewport (see the Parallax Scroll Drift knob).
+      const slackScale = (boxH + driftMaxPx()) / naturalImg.h;
+      const scale = Math.max(coverScale, slackScale);
       bgImageEl.style.backgroundSize = `${naturalImg.w * scale}px ${naturalImg.h * scale}px`;
     }
 
-    function updateDrift() {
-      const rawMax = getComputedStyle(document.documentElement).getPropertyValue('--bg-drift-max');
-      const bgDriftMax = parseFloat(rawMax) || 150;
+    function updatePan() {
+      const rawAnchor = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bg-position-y'));
+      const anchorPct = isNaN(rawAnchor) ? 50 : rawAnchor;
       const stableH = svhProbe.getBoundingClientRect().height || window.innerHeight;
       const maxScroll = document.documentElement.scrollHeight - stableH;
       const fraction = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
-      bgImageEl.style.transform = `translateY(${-(fraction * bgDriftMax)}px)`;
+      const livePct = anchorPct + (100 - anchorPct) * fraction;
+      bgImageEl.style.backgroundPosition = `center ${livePct}%`;
     }
 
     function refreshAll() {
       updateBgSizing();
-      updateDrift();
+      updatePan();
     }
 
-    window.addEventListener('scroll', updateDrift, { passive: true });
+    // Scroll only ever needs to re-pan (sizing is scroll-independent), and
+    // is throttled to one recompute per frame -- background-position
+    // changes paint (unlike a transform), so this keeps scroll from
+    // re-running the getComputedStyle/getBoundingClientRect reads on every
+    // single scroll event.
+    let panQueued = false;
+    function queuePan() {
+      if (panQueued) return;
+      panQueued = true;
+      requestAnimationFrame(function () { panQueued = false; updatePan(); });
+    }
+
+    window.addEventListener('scroll', queuePan, { passive: true });
     window.addEventListener('resize', refreshAll, { passive: true });
     // Fonts/images/iframes finishing after the initial synchronous run can
     // grow the page (or change the measured viewport probes) -- re-measure
@@ -256,7 +278,7 @@
     global.WeddingEffects = global.WeddingEffects || {};
     global.WeddingEffects.setBgImageNaturalSize = function (w, h) {
       naturalImg = { w: w || 0, h: h || 0 };
-      updateBgSizing();
+      refreshAll();
     };
   })();
 

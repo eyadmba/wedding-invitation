@@ -15,7 +15,10 @@
   --bg-color: rgba(244,239,227,0);
   --bg-color-solid: #f4efe3;
   --bg-image: none;
-  --bg-drift-max: 150px;
+  --bg-drift-max: 150px; /* minimum guaranteed px of scrollable slack below
+     the viewport, forcing extra zoom on the photo if needed -- see
+     effects.js's initBackgroundPan() for how this and the line below
+     actually get used (not a literal CSS length here, just a JS input). */
   --bg-position-y: 50%; /* where in the photo the crop starts, see .bg-image below */
   --bg-blend-mode: normal;
 
@@ -320,37 +323,27 @@ body{
 }
 
 /* ---- optional custom background photo/texture, set from the design lab.
-   Fixed to the viewport (not sized to the whole document) so `cover` only
-   ever has to fill one screen -- stretching it to the full page height
-   would force a huge upscale on most photos and turn them soft/blurry.
-   It's a little taller than the viewport (by --bg-drift-max) purely as a
-   buffer so the small scroll-linked translateY in updateBgImageDrift()
-   never exposes a bottom edge. Sits above .bg-fixed's own backdrop (-2)
-   but below the falling-leaves canvas/content (1/2). ---- */
+   Fixed to (and sized to) the viewport, not the whole document -- height,
+   background-size and background-position are all owned by effects.js's
+   initBackgroundPan() at runtime (see its comment for the full model: the
+   photo is force-zoomed just enough to guarantee real scrollable slack
+   beyond the viewport, then panned via background-position percentages
+   from the Crop Position Y anchor up to fully bottom-anchored by the time
+   you reach the end of the page -- which can never expose a gap, since
+   "100%" is defined as flush with the box's bottom regardless of how much
+   slack exists). Sits above .bg-fixed's own backdrop (-2) but below the
+   falling-leaves canvas/content (1/2). ---- */
 .bg-image{
   position: fixed;
-  /* height/background-size below are just the pre-JS fallback (and last
-     resort if JS ever fails to run): effects.js's updateBgSizing() takes
-     over both as soon as it can, setting them as inline styles (which beat
-     these) computed from a JS-measured 100lvh probe rather than a raw CSS
-     `calc(100lvh + ...)` -- see that function's comment for why a live
-     calc() here was leaving a stale/short box on first paint in some
-     engines (the "white bar at the bottom" bug), and why plain
-     `background-size: cover` alone could leave the crop-position slider
-     with ~0px of vertical room to move on portrait photos/viewports. */
+  /* everything below is just the pre-JS fallback (and last resort if JS
+     ever fails to run) -- plain center-cover, no pan. */
   top: 0; left: 0; right: 0;
-  height: calc(100lvh + var(--bg-drift-max));
+  height: 100lvh;
   z-index: -1;
   background-image: var(--bg-image, none);
   background-size: cover;
-  /* the design lab's "Crop Position Y" slider -- under cover, 0% anchors
-     the photo's top edge to the box's top (the old fixed "top center"),
-     100% anchors its bottom edge instead, so this is where the crop
-     *starts*; the scroll drift below then moves it further down from
-     there. */
-  background-position: center var(--bg-position-y, 0%);
+  background-position: center var(--bg-position-y, 50%);
   background-repeat: no-repeat;
-  will-change: transform;
   pointer-events: none;
 }
 
