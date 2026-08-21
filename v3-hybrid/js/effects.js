@@ -184,13 +184,17 @@
   // the photo up (forcibly, past what `cover` alone needs, if the source is
   // too short) so there's always at least --bg-drift-max px of pure
   // vertical slack beyond the viewport, then pans through that slack purely
-  // via `background-position-y` percentages. Percentages are already
-  // defined relative to *whatever* slack currently exists (0% = image top
-  // flush with the box top, 100% = image bottom flush with the box bottom)
-  // -- so blending from the Crop Position Y slider's anchor up to 100% as
-  // the page scrolls can mathematically never expose the flat color behind
-  // it, no matter how much slack the anchor already ate into, or how
+  // via `background-position` percentages. Percentages are already defined
+  // relative to *whatever* slack currently exists (0% = image edge flush
+  // with the box's edge on that side, 100% = the opposite edge) -- so
+  // blending from the Crop Position Y slider's anchor up to 100% as the
+  // page scrolls can mathematically never expose the flat color behind it,
+  // no matter how much slack the anchor already ate into, or how
   // aggressively the image had to be zoomed to get any slack at all.
+  // Horizontal (Crop Position X) is simpler: a static anchor, no scroll
+  // blending -- there's no horizontal equivalent of "scrolling the page",
+  // so it just picks which slice of the image's width to show and stays
+  // there.
   (function initBackgroundPan() {
     const bgImageEl = document.querySelector('.bg-image');
     if (!bgImageEl) return;
@@ -209,6 +213,15 @@
     document.body.append(svhProbe, lvhProbe);
 
     let naturalImg = { w: 0, h: 0 };
+    // There's no user-facing "horizontal drift" slider (Crop Position X is
+    // just a static anchor), so unlike the vertical slack -- which is
+    // guaranteed by --bg-drift-max -- horizontal slack gets a fixed minimum
+    // ratio instead, purely so the X slider always has *some* real room to
+    // move even when `cover` alone would otherwise land exactly
+    // width-matched (the common case: a portrait photo on a landscape
+    // viewport is height-constrained under cover, leaving zero horizontal
+    // slack on its own).
+    const MIN_H_SLACK_RATIO = 1.15;
 
     function boxHeight() {
       return lvhProbe.getBoundingClientRect().height || window.innerHeight;
@@ -228,23 +241,29 @@
       }
       const boxW = window.innerWidth;
       const coverScale = Math.max(boxW / naturalImg.w, boxH / naturalImg.h);
-      // Guarantee at least driftMaxPx of real slack beyond the box, even if
-      // that means zooming in well past what `cover` needs on its own --
-      // soft/upscaled on a too-small source, but never short of the
-      // viewport (see the Parallax Scroll Drift knob).
-      const slackScale = (boxH + driftMaxPx()) / naturalImg.h;
-      const scale = Math.max(coverScale, slackScale);
+      // Guarantee at least driftMaxPx of real vertical slack, and at least
+      // MIN_H_SLACK_RATIO's worth of horizontal slack, beyond the box --
+      // even if that means zooming in well past what `cover` needs on its
+      // own (soft/upscaled on a too-small source, but the sliders always
+      // have real room to move, and the photo never falls short of the
+      // viewport).
+      const vSlackScale = (boxH + driftMaxPx()) / naturalImg.h;
+      const hSlackScale = (boxW * MIN_H_SLACK_RATIO) / naturalImg.w;
+      const scale = Math.max(coverScale, vSlackScale, hSlackScale);
       bgImageEl.style.backgroundSize = `${naturalImg.w * scale}px ${naturalImg.h * scale}px`;
     }
 
     function updatePan() {
-      const rawAnchor = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bg-position-y'));
+      const style = getComputedStyle(document.documentElement);
+      const rawX = parseFloat(style.getPropertyValue('--bg-position-x'));
+      const xPct = isNaN(rawX) ? 50 : rawX;
+      const rawAnchor = parseFloat(style.getPropertyValue('--bg-position-y'));
       const anchorPct = isNaN(rawAnchor) ? 50 : rawAnchor;
       const stableH = svhProbe.getBoundingClientRect().height || window.innerHeight;
       const maxScroll = document.documentElement.scrollHeight - stableH;
       const fraction = maxScroll > 0 ? Math.min(1, Math.max(0, window.scrollY / maxScroll)) : 0;
-      const livePct = anchorPct + (100 - anchorPct) * fraction;
-      bgImageEl.style.backgroundPosition = `center ${livePct}%`;
+      const liveYPct = anchorPct + (100 - anchorPct) * fraction;
+      bgImageEl.style.backgroundPosition = `${xPct}% ${liveYPct}%`;
     }
 
     function refreshAll() {

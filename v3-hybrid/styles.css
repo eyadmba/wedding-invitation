@@ -17,8 +17,9 @@
   --bg-image: none;
   --bg-drift-max: 150px; /* minimum guaranteed px of scrollable slack below
      the viewport, forcing extra zoom on the photo if needed -- see
-     effects.js's initBackgroundPan() for how this and the line below
+     effects.js's initBackgroundPan() for how this and the two lines below
      actually get used (not a literal CSS length here, just a JS input). */
+  --bg-position-x: 50%; /* horizontal anchor -- static, no scroll drift */
   --bg-position-y: 50%; /* where in the photo the crop starts, see .bg-image below */
   --bg-blend-mode: normal;
 
@@ -327,12 +328,13 @@ body{
    background-size and background-position are all owned by effects.js's
    initBackgroundPan() at runtime (see its comment for the full model: the
    photo is force-zoomed just enough to guarantee real scrollable slack
-   beyond the viewport, then panned via background-position percentages
-   from the Crop Position Y anchor up to fully bottom-anchored by the time
-   you reach the end of the page -- which can never expose a gap, since
-   "100%" is defined as flush with the box's bottom regardless of how much
-   slack exists). Sits above .bg-fixed's own backdrop (-2) but below the
-   falling-leaves canvas/content (1/2). ---- */
+   beyond the viewport, then panned via background-position percentages --
+   vertically, from the Crop Position Y anchor up to fully bottom-anchored
+   by the time you reach the end of the page (which can never expose a gap,
+   since "100%" is defined as flush with the box's bottom regardless of how
+   much slack exists); horizontally, a static anchor from Crop Position X,
+   with no scroll-linked movement). Sits above .bg-fixed's own backdrop (-2)
+   but below the falling-leaves canvas/content (1/2). ---- */
 .bg-image{
   position: fixed;
   /* everything below is just the pre-JS fallback (and last resort if JS
@@ -342,7 +344,7 @@ body{
   z-index: -1;
   background-image: var(--bg-image, none);
   background-size: cover;
-  background-position: center var(--bg-position-y, 50%);
+  background-position: var(--bg-position-x, 50%) var(--bg-position-y, 50%);
   background-repeat: no-repeat;
   pointer-events: none;
 }
