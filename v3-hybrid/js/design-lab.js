@@ -55,7 +55,7 @@
     // Default contrast override for timeline hour
     if (s.cards.timeline) {
       s.cards.timeline.overrides.hourTextColor = true;
-      s.cards.timeline.values.hourTextColor = { hex: '#edf2e4', alpha: 100 };
+      s.cards.timeline.values.hourTextColor = { hex: '#520000', alpha: 100 };
     }
     return s;
   }
@@ -108,6 +108,11 @@
     if (g.bgOverlayBlend !== undefined) {
       g.bgBlendMode = g.bgOverlayBlend;
       delete g.bgOverlayBlend;
+    }
+    if (g.textShadow !== undefined) {
+      if (g.textShadowBlur === undefined) g.textShadowBlur = g.textShadow;
+      if (g.textShadowOpacity === undefined) g.textShadowOpacity = g.textShadow * 10;
+      delete g.textShadow;
     }
     if (g.accentColor || g.accentColorDeep) {
       obj.cards = obj.cards || {};

@@ -85,20 +85,26 @@
   --leaf-color: #8a6a30;   /* falling-leaves canvas: the leaf shape */
   --petal-color: #a3813f; /* falling-leaves canvas: the petal shape */
 
-  --text-shadow-intensity: 5; /* 0 = no shadow, 10 = max; design-lab slider.
-     Defaulted on (rather than 0) since light text over light/busy
-     backgrounds needs some lift to stay legible; still subtle at this
-     level -- see the .wrap comment below for how it's applied. This is now
-     the ONE shadow control for the entire site: the hero's glow below is
-     scaled off it too (rather than being a separate always-on effect), so
-     dragging it to 0 genuinely removes every text shadow, hero included. */
+  --text-shadow-blur: 0; /* 0 = no spread, 10 = max; design-lab slider.
+     Controls how far the shadow spreads (offset + blur radius) -- see
+     --text-shadow-opacity right below for the independent alpha control.
+     Together these are the ONE shadow system for the entire site: the
+     hero's glow below scales off both of them too (rather than being a
+     separate always-on effect), so dragging either to 0 genuinely removes
+     every text shadow, hero included -- see the .wrap comment for how
+     they're applied. Color is intentionally fixed to black; only spread
+     and opacity are tunable. */
+  --text-shadow-opacity: 0; /* 0-100%; independent of --text-shadow-blur so
+     a wide, faint shadow and a tight, dark one are both reachable. */
 
-  /* the hero's glow, lifted verbatim from theme1's own .text-glow utility
-     (oklch(25% .02 150 / .45), 0 1px 18px at the slider's default of 5) --
-     blur and alpha both scale linearly off --text-shadow-intensity so the
-     numbers land exactly on that reference at the default, 0 at the
-     slider's minimum, and stronger past it. */
-  --hero-glow: 0 1px calc(var(--text-shadow-intensity) * 3.6px) oklch(25% .02 150 / calc(var(--text-shadow-intensity) * 0.09));
+  /* the hero's glow, loosely descended from theme1's own .text-glow
+     utility -- blur scales off --text-shadow-blur (18px at the slider's
+     midpoint, 5) and alpha scales 1:1 off --text-shadow-opacity (opacity
+     50% -> 50% alpha, 100% -> fully opaque black), so both sliders reach
+     all the way to a strong, unmistakable shadow at their max, 0 at
+     either's minimum. Color fixed to black per the design-lab knob (no
+     color picker for shadows). */
+  --hero-glow: 0 1px calc(var(--text-shadow-blur) * 3.6px) rgba(0, 0, 0, var(--text-shadow-opacity));
 
   --ornament-mark-rotate: 0deg; /* the ornament's center glyph; only "square" needs 45deg */
 
@@ -379,18 +385,17 @@ body{
   z-index: 2;
   max-width: 640px;
   margin: 0 auto;
-  /* design-lab "text shadow intensity" knob: text-shadow is inherited, so
-     setting it once here reaches every text element in the page instead
-     of repeating it per element. At the default intensity of 0 both the
-     offset and the alpha resolve to 0, i.e. no visible shadow at all --
-     elements with their own literal text-shadow (like .names .name)
-     layer this in as a second, independent shadow rather than replacing
-     it (see that rule). */
+  /* design-lab "text shadow blur/opacity" knobs: text-shadow is inherited,
+     so setting it once here reaches every text element in the page instead
+     of repeating it per element. At blur 0 or opacity 0 the shadow is
+     fully invisible -- elements with their own literal text-shadow (like
+     .names .name) layer this in as a second, independent shadow rather
+     than replacing it (see that rule). */
   text-shadow:
     0
-    calc(var(--text-shadow-intensity) * 0.15px)
-    calc(var(--text-shadow-intensity) * 0.6px)
-    rgba(0, 0, 0, calc(var(--text-shadow-intensity) * 0.045));
+    calc(var(--text-shadow-blur) * 0.3px)
+    calc(var(--text-shadow-blur) * 1.2px)
+    rgba(0, 0, 0, calc(var(--text-shadow-opacity) * 0.65));
 }
 
 .page{
@@ -513,8 +518,8 @@ html.card-on .card{
 /* بسم الله الرحمن الرحيم, ported from agyIndex.html (its .badge-intro) --
    own font/color/size, all independently controllable in the lab. The
    soft glow (also on .kicker/.row .conn/.names .name below) is hardcoded
-   rather than tied to the shared --text-shadow-intensity slider -- that
-   slider cascades to every section via .wrap, and this glow is only
+   rather than tied to the shared --text-shadow-blur/opacity sliders --
+   those cascade to every section via .wrap, and this glow is only
    meant to match the theme1 reference's hero, not spread site-wide. */
 .bismillah{
   /* pulls in on both sides of the .card's shared gap -- as its own small,
@@ -609,15 +614,15 @@ html.card-on .card{
   line-height:1;
   color: var(--names-color);
   /* two stacked shadows, not one: the fixed highlight below is this
-     element's own look (unrelated to the design-lab intensity knob) --
-     layering the .wrap intensity shadow alongside it, instead of
-     replacing it, keeps that highlight intact at intensity 0. */
+     element's own look (unrelated to the design-lab blur/opacity knobs) --
+     layering the .wrap shadow alongside it, instead of replacing it, keeps
+     that highlight intact at blur/opacity 0. */
   text-shadow:
     0 1px 0 rgba(255,255,255,0.5),
     0
-    calc(var(--text-shadow-intensity) * 0.15px)
-    calc(var(--text-shadow-intensity) * 0.6px)
-    rgba(0, 0, 0, calc(var(--text-shadow-intensity) * 0.045)),
+    calc(var(--text-shadow-blur) * 0.3px)
+    calc(var(--text-shadow-blur) * 1.2px)
+    rgba(0, 0, 0, calc(var(--text-shadow-opacity) * 0.65)),
     var(--hero-glow);
 }
 /* the "و" between bride & groom -- follows --names-color like the two

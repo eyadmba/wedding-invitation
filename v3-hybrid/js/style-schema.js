@@ -71,39 +71,40 @@
     // separate "Overlay Color" knob anymore: set a blend mode and a
     // non-transparent alpha here to tint the photo, or leave alpha at 0 for
     // no tint at all.
-    { id: 'bgColor', label: 'Background Color', type: 'color', cssVar: '--bg-color', default: '#f4efe3', defaultAlpha: 0, group: 'Background' },
+    { id: 'bgColor', label: 'Background Color', type: 'color', cssVar: '--bg-color', default: '#f7f4ed', defaultAlpha: 0, group: 'Background' },
     { id: 'bgBlendMode', label: 'Background Blend Mode', type: 'select', cssVar: '--bg-blend-mode', options: BLEND_MODES, default: 'normal', group: 'Background' },
-    { id: 'bgImage', label: 'Background Image', type: 'bgImage', cssVar: '--bg-image', presets: BG_PRESETS, default: 'assets/backgrounds/sage-floral.jpg', group: 'Background' },
+    { id: 'bgImage', label: 'Background Image', type: 'bgImage', cssVar: '--bg-image', presets: BG_PRESETS, default: 'assets/backgrounds/Club.jpg', group: 'Background' },
     { id: 'bgPositionX', label: 'Crop Position X', type: 'range', cssVar: '--bg-position-x', min: 0, max: 100, default: 50, unit: '%', group: 'Background' },
     { id: 'bgPositionY', label: 'Crop Position Y', type: 'range', cssVar: '--bg-position-y', min: 0, max: 100, default: 50, unit: '%', group: 'Background' },
-    { id: 'bgParallax', label: 'Parallax Scroll Drift', type: 'range', cssVar: '--bg-drift-max', min: 0, max: 150, default: 150, unit: 'px', group: 'Background' },
+    { id: 'bgParallax', label: 'Parallax Scroll Drift', type: 'range', cssVar: '--bg-drift-max', min: 0, max: 150, default: 0, unit: 'px', group: 'Background' },
 
     // Functional Colors
-    { id: 'cardTitleColor', label: 'Card Title Color', type: 'color', cssVar: '--card-title-color', default: '#edf2e4', defaultAlpha: 100, group: 'Colors' },
-    { id: 'cardTextColor', label: 'Card Text Color', type: 'color', cssVar: '--card-text-color', default: '#556b2f', defaultAlpha: 100, group: 'Colors' },
-    { id: 'buttonColor', label: 'Button Background', type: 'color', cssVar: '--button-color', default: '#edf2e4', defaultAlpha: 100, group: 'Colors' },
-    { id: 'buttonTextColor', label: 'Button Text Color', type: 'color', cssVar: '--button-text-color', default: '#556b2f', defaultAlpha: 100, group: 'Colors' },
-    { id: 'ornamentColor', label: 'Ornament & Accent Color', type: 'color', cssVar: '--ornament-color', default: '#fff0d1', defaultAlpha: 100, group: 'Colors' },
+    { id: 'cardTitleColor', label: 'Card Title Color', type: 'color', cssVar: '--card-title-color', default: '#520000', defaultAlpha: 100, group: 'Colors' },
+    { id: 'cardTextColor', label: 'Card Text Color', type: 'color', cssVar: '--card-text-color', default: '#520000', defaultAlpha: 100, group: 'Colors' },
+    { id: 'buttonColor', label: 'Button Background', type: 'color', cssVar: '--button-color', default: '#530914', defaultAlpha: 100, group: 'Colors' },
+    { id: 'buttonTextColor', label: 'Button Text Color', type: 'color', cssVar: '--button-text-color', default: '#ffffff', defaultAlpha: 100, group: 'Colors' },
+    { id: 'ornamentColor', label: 'Ornament & Accent Color', type: 'color', cssVar: '--ornament-color', default: '#fff7c2', defaultAlpha: 100, group: 'Colors' },
 
     // Fonts & Sizing
     { id: 'displayFont', label: 'Display Font (Titles)', type: 'font', cssVar: '--font-display', options: FONT_OPTIONS, default: "'Aref Ruqaa', serif", group: 'Fonts' },
     { id: 'bodyFont', label: 'Body Font (Copy)', type: 'font', cssVar: '--font-body', options: FONT_OPTIONS, default: "'Amiri', serif", group: 'Fonts' },
     { id: 'textScale', label: 'General Text Scale', type: 'scale', cssVar: '--text-scale', min: 50, max: 200, default: 100, group: 'Size & Shadow' },
-    { id: 'cardTitleSize', label: 'Card Title Scale', type: 'scale', cssVar: '--card-title-scale', min: 50, max: 200, default: 100, group: 'Size & Shadow' },
-    { id: 'textShadow', label: 'Text Shadow Intensity', type: 'range', cssVar: '--text-shadow-intensity', min: 0, max: 10, default: 5, unit: '', group: 'Size & Shadow' },
+    { id: 'cardTitleSize', label: 'Card Title Scale', type: 'scale', cssVar: '--card-title-scale', min: 50, max: 200, default: 138, group: 'Size & Shadow' },
+    { id: 'textShadowBlur', label: 'Text Shadow Spread', type: 'range', cssVar: '--text-shadow-blur', min: 0, max: 10, default: 2, unit: '', group: 'Size & Shadow' },
+    { id: 'textShadowOpacity', label: 'Text Shadow Opacity', type: 'range', cssVar: '--text-shadow-opacity', min: 0, max: 100, default: 25, unit: '%', group: 'Size & Shadow' },
 
     // Ornaments & Effects
     { id: 'ornamentMark', label: 'Ornament Glyph', type: 'ornamentMark', cssVar: '--ornament-mark-rotate', marks: ORNAMENT_MARKS, default: 'star', group: 'Effects' },
     { id: 'petalsEnabled', label: 'Falling Leaves / Petals', type: 'toggle', target: 'petals', default: true, group: 'Effects' },
-    { id: 'leafColor', label: 'Leaf Color', type: 'colorNoAlpha', cssVar: '--leaf-color', default: '#8a6a30', group: 'Effects' },
-    { id: 'petalColor', label: 'Petal Color', type: 'colorNoAlpha', cssVar: '--petal-color', default: '#a3813f', group: 'Effects' },
+    { id: 'leafColor', label: 'Leaf Color', type: 'colorNoAlpha', cssVar: '--leaf-color', default: '#2e490d', group: 'Effects' },
+    { id: 'petalColor', label: 'Petal Color', type: 'colorNoAlpha', cssVar: '--petal-color', default: '#6f1623', group: 'Effects' },
 
     // Glass Card Surface
     { id: 'cardBackgroundEnabled', label: 'Enable Glass Cards', type: 'toggle', target: 'cardBackground', default: true, group: 'Card Glass' },
-    { id: 'cardColor', label: 'Card Base Tint', type: 'colorNoAlpha', cssVar: null, default: '#878787', group: 'Card Glass' },
-    { id: 'cardAlpha', label: 'Card Opacity', type: 'range', cssVar: null, min: 0, max: 100, default: 20, unit: '%', group: 'Card Glass' },
+    { id: 'cardColor', label: 'Card Base Tint', type: 'colorNoAlpha', cssVar: null, default: '#b17f07', group: 'Card Glass' },
+    { id: 'cardAlpha', label: 'Card Opacity', type: 'range', cssVar: null, min: 0, max: 100, default: 5, unit: '%', group: 'Card Glass' },
     { id: 'cardBlurEnabled', label: 'Backdrop Blur', type: 'toggle', target: 'cardBlur', default: true, group: 'Card Glass' },
-    { id: 'cardBlurAmount', label: 'Blur Amount', type: 'range', cssVar: null, min: 0, max: 40, default: 14, unit: 'px', group: 'Card Glass' }
+    { id: 'cardBlurAmount', label: 'Blur Amount', type: 'range', cssVar: null, min: 0, max: 40, default: 9, unit: 'px', group: 'Card Glass' }
   ];
 
   // ---- CARDS (Per-Section Knobs and Overrides) ----
@@ -114,21 +115,21 @@
       icon: '👑',
       knobs: [
         { id: 'bismillahFont', label: 'Bismillah Font', type: 'font', cssVar: '--bismillah-font', options: FONT_OPTIONS, default: "'Aref Ruqaa', serif" },
-        { id: 'bismillahColor', label: 'Bismillah Color', type: 'color', cssVar: '--bismillah-color', default: '#f3ecd8', defaultAlpha: 100 },
+        { id: 'bismillahColor', label: 'Bismillah Color', type: 'color', cssVar: '--bismillah-color', default: '#520000', defaultAlpha: 100 },
         { id: 'bismillahScale', label: 'Bismillah Size', type: 'scale', cssVar: '--bismillah-scale', min: 50, max: 200, default: 100 },
-        { id: 'kickerColor', label: 'Kicker Color (دعوة لمن نحب)', type: 'color', cssVar: '--kicker-color', default: '#f3ecd8', defaultAlpha: 100 },
+        { id: 'kickerColor', label: 'Kicker Color (دعوة لمن نحب)', type: 'color', cssVar: '--kicker-color', default: '#520000', defaultAlpha: 100 },
         { id: 'kickerScale', label: 'Kicker Size', type: 'scale', cssVar: '--kicker-scale', min: 50, max: 200, default: 100 },
-        { id: 'verseColor', label: 'Verse Color', type: 'color', cssVar: '--verse-color', default: '#f3ecd8', defaultAlpha: 95 },
+        { id: 'verseColor', label: 'Verse Color', type: 'color', cssVar: '--verse-color', default: '#520000', defaultAlpha: 100 },
         { id: 'verseScale', label: 'Verse Size', type: 'scale', cssVar: '--verse-scale', min: 50, max: 200, default: 100 },
-        { id: 'couplesColor', label: 'Bride & Groom Names Color', type: 'color', cssVar: '--names-color', default: '#f3ecd8', defaultAlpha: 100 },
+        { id: 'couplesColor', label: 'Bride & Groom Names Color', type: 'color', cssVar: '--names-color', default: '#520000', defaultAlpha: 100 },
         { id: 'namesScale', label: 'Names Size', type: 'scale', cssVar: '--names-scale', min: 50, max: 200, default: 100 },
-        { id: 'fathersColor', label: 'Fathers Names Color', type: 'color', cssVar: '--fathers-color', default: '#f3ecd8', defaultAlpha: 100 },
+        { id: 'fathersColor', label: 'Fathers Names Color', type: 'color', cssVar: '--fathers-color', default: '#520000', defaultAlpha: 100 },
         { id: 'fathersScale', label: 'Fathers Size', type: 'scale', cssVar: '--fathers-scale', min: 50, max: 200, default: 100 },
-        { id: 'heroSecondaryColor', label: 'Secondary Color (يتشرف / بدعوتكم)', type: 'color', cssVar: '--hero-secondary', default: '#f3ecd8', defaultAlpha: 88 },
+        { id: 'heroSecondaryColor', label: 'Secondary Color (يتشرف / بدعوتكم)', type: 'color', cssVar: '--hero-secondary', default: '#520000', defaultAlpha: 100 },
         { id: 'heroSecondaryScale', label: 'Secondary Size', type: 'scale', cssVar: '--hero-secondary-scale', min: 50, max: 200, default: 100 },
-        { id: 'heroDateColor', label: 'Date Line Color', type: 'color', cssVar: '--hero-date-color', default: '#f3ecd8', defaultAlpha: 90 },
+        { id: 'heroDateColor', label: 'Date Line Color', type: 'color', cssVar: '--hero-date-color', default: '#520000', defaultAlpha: 100 },
         { id: 'heroDateScale', label: 'Date Line Size', type: 'scale', cssVar: '--hero-date-scale', min: 50, max: 200, default: 100 },
-        { id: 'footerColor', label: 'Footer Notice Color', type: 'color', cssVar: '--footer-color', default: '#f3ecd8', defaultAlpha: 100 },
+        { id: 'footerColor', label: 'Footer Notice Color', type: 'color', cssVar: '--footer-color', default: '#520000', defaultAlpha: 100 },
         { id: 'footerScale', label: 'Footer Notice Size', type: 'scale', cssVar: '--footer-scale', min: 50, max: 200, default: 100 }
       ],
       overridable: []
@@ -138,11 +139,11 @@
       label: 'Timeline Section',
       icon: '⏳',
       knobs: [
-        { id: 'accentColor', label: 'Timeline Line (Light)', type: 'color', cssVar: '--accent-color', default: '#a3813f', defaultAlpha: 100 },
-        { id: 'accentColorDeep', label: 'Timeline Dot (Deep)', type: 'color', cssVar: '--accent-color-deep', default: '#8a6a30', defaultAlpha: 100 },
-        { id: 'sectionTitleColor', label: 'Section Title Color', type: 'color', cssVar: '--timeline-title-color', overrides: 'cardTitleColor', default: '#edf2e4', defaultAlpha: 100 },
-        { id: 'hourTextColor', label: 'Hour Text Color', type: 'color', cssVar: '--timeline-hour-color', overrides: 'cardTextColor', default: '#edf2e4', defaultAlpha: 100 },
-        { id: 'labelTextColor', label: 'Label Text Color', type: 'color', cssVar: '--timeline-label-color', overrides: 'cardTextColor', default: '#556b2f', defaultAlpha: 100 }
+        { id: 'accentColor', label: 'Timeline Line (Light)', type: 'color', cssVar: '--accent-color', default: '#520000', defaultAlpha: 100 },
+        { id: 'accentColorDeep', label: 'Timeline Dot (Deep)', type: 'color', cssVar: '--accent-color-deep', default: '#520000', defaultAlpha: 100 },
+        { id: 'sectionTitleColor', label: 'Section Title Color', type: 'color', cssVar: '--timeline-title-color', overrides: 'cardTitleColor', default: '#520000', defaultAlpha: 100 },
+        { id: 'hourTextColor', label: 'Hour Text Color', type: 'color', cssVar: '--timeline-hour-color', overrides: 'cardTextColor', default: '#520000', defaultAlpha: 100 },
+        { id: 'labelTextColor', label: 'Label Text Color', type: 'color', cssVar: '--timeline-label-color', overrides: 'cardTextColor', default: '#520000', defaultAlpha: 100 }
       ],
       overridable: ['cardTitleColor', 'cardTextColor']
     },
@@ -151,9 +152,9 @@
       label: 'Location Section',
       icon: '📍',
       knobs: [
-        { id: 'sectionTitleColor', label: 'Section Title Color', type: 'color', cssVar: '--location-title-color', overrides: 'cardTitleColor', default: '#edf2e4', defaultAlpha: 100 },
-        { id: 'venueNameColor', label: 'Venue Name Color', type: 'color', cssVar: '--location-venue-color', overrides: 'cardTitleColor', default: '#edf2e4', defaultAlpha: 100 },
-        { id: 'venueTimeColor', label: 'Venue Time Color', type: 'color', cssVar: '--location-time-color', overrides: 'cardTextColor', default: '#556b2f', defaultAlpha: 100 }
+        { id: 'sectionTitleColor', label: 'Section Title Color', type: 'color', cssVar: '--location-title-color', overrides: 'cardTitleColor', default: '#520000', defaultAlpha: 100 },
+        { id: 'venueNameColor', label: 'Venue Name Color', type: 'color', cssVar: '--location-venue-color', overrides: 'cardTitleColor', default: '#520000', defaultAlpha: 100 },
+        { id: 'venueTimeColor', label: 'Venue Time Color', type: 'color', cssVar: '--location-time-color', overrides: 'cardTextColor', default: '#520000', defaultAlpha: 100 }
       ],
       overridable: ['cardTitleColor', 'cardTextColor']
     },
@@ -162,9 +163,9 @@
       label: 'RSVP Section',
       icon: '💌',
       knobs: [
-        { id: 'sectionTitleColor', label: 'Section Title Color', type: 'color', cssVar: '--rsvp-title-color', overrides: 'cardTitleColor', default: '#edf2e4', defaultAlpha: 100 },
-        { id: 'questionColor', label: 'Question Color', type: 'color', cssVar: '--rsvp-question-color', overrides: 'cardTitleColor', default: '#edf2e4', defaultAlpha: 100 },
-        { id: 'answerColor', label: 'Answer Options Color', type: 'color', cssVar: '--rsvp-answer-color', overrides: 'cardTextColor', default: '#556b2f', defaultAlpha: 100 }
+        { id: 'sectionTitleColor', label: 'Section Title Color', type: 'color', cssVar: '--rsvp-title-color', overrides: 'cardTitleColor', default: '#520000', defaultAlpha: 100 },
+        { id: 'questionColor', label: 'Question Color', type: 'color', cssVar: '--rsvp-question-color', overrides: 'cardTitleColor', default: '#520000', defaultAlpha: 100 },
+        { id: 'answerColor', label: 'Answer Options Color', type: 'color', cssVar: '--rsvp-answer-color', overrides: 'cardTextColor', default: '#520000', defaultAlpha: 100 }
       ],
       overridable: ['cardTitleColor', 'cardTextColor']
     }
@@ -173,8 +174,104 @@
   // ---- SHIPPED PRESET THEMES (Ported from v2-gemini) ----
   var PRESET_THEMES = [
     {
+      id: 'king-hussein-club',
+      label: 'King Hussein Club (Default)',
+      state: {
+        global: {
+          bgColor: { hex: '#f7f4ed', alpha: 0 },
+          bgBlendMode: 'normal',
+          bgImage: { preset: 'assets/backgrounds/Club.jpg', dataUrl: null },
+          bgPositionX: 50,
+          bgPositionY: 50,
+          bgParallax: 0,
+          cardTitleColor: { hex: '#520000', alpha: 100 },
+          cardTextColor: { hex: '#520000', alpha: 100 },
+          buttonColor: { hex: '#530914', alpha: 100 },
+          buttonTextColor: { hex: '#ffffff', alpha: 100 },
+          ornamentColor: { hex: '#fff7c2', alpha: 100 },
+          displayFont: "'Aref Ruqaa', serif",
+          bodyFont: "'Amiri', serif",
+          textScale: 100,
+          cardTitleSize: 138,
+          textShadowBlur: 2,
+          textShadowOpacity: 25,
+          ornamentMark: 'star',
+          petalsEnabled: true,
+          leafColor: '#2e490d',
+          petalColor: '#6f1623',
+          cardBackgroundEnabled: true,
+          cardColor: '#b17f07',
+          cardAlpha: 5,
+          cardBlurEnabled: true,
+          cardBlurAmount: 9
+        },
+        cards: {
+          hero: {
+            values: {
+              bismillahFont: "'Aref Ruqaa', serif",
+              bismillahColor: { hex: '#520000', alpha: 100 },
+              bismillahScale: 100,
+              kickerColor: { hex: '#520000', alpha: 100 },
+              kickerScale: 100,
+              verseColor: { hex: '#520000', alpha: 100 },
+              verseScale: 100,
+              couplesColor: { hex: '#520000', alpha: 100 },
+              namesScale: 100,
+              fathersColor: { hex: '#520000', alpha: 100 },
+              fathersScale: 100,
+              heroSecondaryColor: { hex: '#520000', alpha: 100 },
+              heroSecondaryScale: 100,
+              heroDateColor: { hex: '#520000', alpha: 100 },
+              heroDateScale: 100,
+              footerColor: { hex: '#520000', alpha: 100 },
+              footerScale: 100
+            },
+            overrides: {}
+          },
+          timeline: {
+            values: {
+              accentColor: { hex: '#520000', alpha: 100 },
+              accentColorDeep: { hex: '#520000', alpha: 100 },
+              sectionTitleColor: { hex: '#520000', alpha: 100 },
+              hourTextColor: { hex: '#520000', alpha: 100 },
+              labelTextColor: { hex: '#520000', alpha: 100 }
+            },
+            overrides: {
+              sectionTitleColor: false,
+              hourTextColor: true,
+              labelTextColor: false
+            }
+          },
+          location: {
+            values: {
+              sectionTitleColor: { hex: '#520000', alpha: 100 },
+              venueNameColor: { hex: '#520000', alpha: 100 },
+              venueTimeColor: { hex: '#520000', alpha: 100 }
+            },
+            overrides: {
+              sectionTitleColor: false,
+              venueNameColor: false,
+              venueTimeColor: false
+            }
+          },
+          rsvp: {
+            values: {
+              sectionTitleColor: { hex: '#520000', alpha: 100 },
+              questionColor: { hex: '#520000', alpha: 100 },
+              answerColor: { hex: '#520000', alpha: 100 }
+            },
+            overrides: {
+              sectionTitleColor: false,
+              questionColor: false,
+              answerColor: false
+            }
+          }
+        }
+      }
+    },
+    {
       id: 'sage-gold',
-      label: 'Sage & Gold (Default)',
+      label: 'Sage & Gold',
       state: {
         global: {
           bgColor: { hex: '#f4efe3', alpha: 0 },
@@ -192,7 +289,8 @@
           bodyFont: "'Amiri', serif",
           textScale: 100,
           cardTitleSize: 100,
-          textShadow: 5,
+          textShadowBlur: 5,
+          textShadowOpacity: 50,
           ornamentMark: 'star',
           petalsEnabled: true,
           leafColor: '#8a6a30',
@@ -287,7 +385,8 @@
           bodyFont: "'El Messiri', sans-serif",
           textScale: 100,
           cardTitleSize: 105,
-          textShadow: 6,
+          textShadowBlur: 6,
+          textShadowOpacity: 60,
           ornamentMark: 'diamond',
           petalsEnabled: true,
           leafColor: '#6B1D2F',
@@ -382,7 +481,8 @@
           bodyFont: "'Amiri', serif",
           textScale: 100,
           cardTitleSize: 100,
-          textShadow: 7,
+          textShadowBlur: 7,
+          textShadowOpacity: 70,
           ornamentMark: 'star',
           petalsEnabled: true,
           leafColor: '#2b533b',
@@ -477,7 +577,8 @@
           bodyFont: "'Amiri', serif",
           textScale: 100,
           cardTitleSize: 100,
-          textShadow: 0,
+          textShadowBlur: 0,
+          textShadowOpacity: 0,
           ornamentMark: 'square',
           petalsEnabled: false,
           leafColor: '#8a7960',
@@ -572,7 +673,8 @@
           bodyFont: "'Amiri', serif",
           textScale: 100,
           cardTitleSize: 105,
-          textShadow: 8,
+          textShadowBlur: 8,
+          textShadowOpacity: 80,
           ornamentMark: 'star',
           petalsEnabled: true,
           leafColor: '#1d3557',
@@ -667,7 +769,8 @@
           bodyFont: "'Amiri', serif",
           textScale: 100,
           cardTitleSize: 100,
-          textShadow: 5,
+          textShadowBlur: 5,
+          textShadowOpacity: 50,
           ornamentMark: 'star',
           petalsEnabled: true,
           leafColor: '#8a6a30',
