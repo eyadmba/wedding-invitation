@@ -661,7 +661,19 @@ html.card-on .card{
   font-size: calc(var(--footer-scale, 1) * clamp(0.85rem, 3.2vw, 1.05rem));
   color: var(--footer-color);
   letter-spacing: 0.01em;
-  text-shadow: var(--hero-glow);
+  /* sits outside the card, directly over the background photo, so the
+     shared --hero-glow alone isn't enough separation at small sizes: a
+     tight dark halo (four 1px offsets + a soft blur) is layered under it
+     so the light beige text stays legible over any part of the photo.
+     Fixed, not driven by the design-lab blur/opacity knobs -- those still
+     ride along via --hero-glow last. */
+  text-shadow:
+    0 1px 2px rgba(0,0,0,0.55),
+    0 -1px 2px rgba(0,0,0,0.35),
+    1px 0 2px rgba(0,0,0,0.35),
+    -1px 0 2px rgba(0,0,0,0.35),
+    0 2px 10px rgba(0,0,0,0.45),
+    var(--hero-glow);
 }
 .footer-info span{
   white-space: nowrap;
@@ -718,7 +730,10 @@ html.card-on .card{
   width: 13px;
   height: 13px;
   border-radius:50%;
-  background: var(--sky-deep);
+  /* filled with the ornament beige rather than the page background, so the
+     dots read as part of the same gold/beige ornamental family as the
+     .ornament marks instead of as holes punched in the line. */
+  background: var(--ornament-color);
   border: 2px solid var(--accent-color-deep);
   transform: translateX(-50%);
 }
@@ -790,17 +805,22 @@ html.card-on .card{
 }
 
 /* ---- rsvp section ---- */
+/* the two answers are one-word ("نعم" / "لا") -- far too short to justify a
+   full-width row each, so they share a line as equal halves and only the
+   submit button spans the form (hence the wrap + 100% basis on it). */
 .rsvp-form{
   display:flex;
-  flex-direction:column;
+  flex-wrap:wrap;
   gap: 14px;
   width:100%;
   max-width: 360px;
 }
 .rsvp-option{
+  flex: 1 1 0;
+  min-width: 0;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
+  justify-content:center;
   gap: 10px;
   font-family: var(--font-body);
   font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.15rem));
@@ -819,6 +839,7 @@ html.card-on .card{
 /* explicit button vars, not the card title/text roles -- see the
    --button-color/--button-text-color comment at the top of :root. */
 .rsvp-submit{
+  flex: 1 1 100%;
   margin-top: 6px;
   font-family: var(--font-body);
   font-weight:700;

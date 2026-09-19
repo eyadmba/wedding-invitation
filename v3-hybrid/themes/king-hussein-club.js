@@ -40,8 +40,8 @@
     "textShadowOpacity": 25,
     "ornamentMark": "star",
     "petalsEnabled": true,
-    "leafColor": "#2e490d",
-    "petalColor": "#6f1623",
+    "leafColor": "#b77676",
+    "petalColor": "#fff7c2",
     "cardBackgroundEnabled": true,
     "cardColor": "#b17f07",
     "cardAlpha": 5,
@@ -88,7 +88,7 @@
         },
         "heroDateScale": 100,
         "footerColor": {
-          "hex": "#520000",
+          "hex": "#fff7c2",
           "alpha": 100
         },
         "footerScale": 100
