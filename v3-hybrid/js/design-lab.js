@@ -81,8 +81,13 @@
   }
 
   function setState(obj) {
+    // Cloned defensively: migrateLegacyState mutates its argument in place,
+    // and obj is often a direct reference into a shared object -- a built-in
+    // theme's entry in window.WeddingThemes (reselecting it later should see
+    // the same data, not whatever the last migration left behind) or a saved
+    // localStorage/import blob the caller might reuse.
     state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-    deepMerge(state, migrateLegacyState(obj || {}));
+    deepMerge(state, migrateLegacyState(JSON.parse(JSON.stringify(obj || {}))));
     sanitizeState();
     applyAll();
     rebuildPanel();
@@ -581,10 +586,45 @@
     return el('div', { class: 'palette-bar' }, [swatchesRow, actionsRow]);
   }
 
-  // ---- Theme Selector & Persistence Toolbar ----
-  var BUILTIN_THEMES = Schema.PRESET_THEMES || [
-    { id: 'sage-gold', label: 'Sage & Gold (Default)', state: DEFAULT_STATE }
-  ];
+  // ==================================================================
+  // Theme Loading (data pre-loaded into window.WeddingThemes by <script> tags)
+  // ==================================================================
+  // Built-in themes no longer ship as JS objects in this file -- only the
+  // registry (id, label) is hardcoded, in style-schema.js. Each theme's
+  // actual knob values live in v3-hybrid/themes/<id>.js, which index.html
+  // loads with an ordinary <script src> tag (see the comment there) and
+  // which stashes its data in window.WeddingThemes[id] as a side effect.
+  //
+  // That's a <script> tag rather than a fetch() of a themes/<id>.json file
+  // on purpose: this site is meant to also work opened straight off disk
+  // (file://), and Chromium's file:// CORS policy blocks fetch()/XHR of a
+  // local file, but not loading a local file via <script src> -- so the
+  // "theme file" has to be JS that assigns into a global rather than raw
+  // JSON that something fetches. Everything else about the split (state
+  // shape, one file per theme, deepMerge over knob defaults filling in any
+  // field a theme's file omits) is unchanged from a plain JSON design.
+  //
+  // Because the data is already present by the time this script runs (its
+  // <script> tag comes after the theme tags in index.html), reading it is
+  // synchronous -- no async/fallback dance needed the way a real fetch
+  // would require.
+  var THEME_REGISTRY = Schema.THEME_REGISTRY || [];
+  var DEFAULT_THEME_ID = Schema.DEFAULT_THEME_ID || (THEME_REGISTRY[0] && THEME_REGISTRY[0].id);
+
+  function getThemeState(id) {
+    return (global.WeddingThemes && global.WeddingThemes[id]) || null;
+  }
+
+  // Which <option value="..."> should be selected next time the theme
+  // dropdown is (re)built. setState() rebuilds the whole drawer -- including
+  // a brand-new <select> -- via rebuildPanel(), so without tracking this
+  // separately the dropdown would silently snap back to its first option
+  // (the default theme) every time a theme is loaded, even though the
+  // second, third, etc. theme picked is what's actually showing. Left null
+  // for state that doesn't correspond to a specific registry/user entry
+  // (an imported JSON blob); the dropdown then just falls back to showing
+  // its first option, same as before this was tracked.
+  var activeThemeSelectValue = null;
 
   function loadUserThemes() {
     try {
@@ -597,28 +637,36 @@
     try { localStorage.setItem(THEMES_KEY, JSON.stringify(list)); } catch (e) {}
   }
 
+  // ---- Theme Selector & Persistence Toolbar ----
   function buildThemeBar() {
     var select = el('select', { class: 'theme-dropdown' });
     function refreshOptions() {
       select.innerHTML = '';
-      BUILTIN_THEMES.forEach(function (t) { select.appendChild(el('option', { value: 'builtin:' + t.id, text: t.label })); });
+      THEME_REGISTRY.forEach(function (t) { select.appendChild(el('option', { value: 'builtin:' + t.id, text: t.label })); });
       loadUserThemes().forEach(function (t) { select.appendChild(el('option', { value: 'user:' + t.id, text: t.label })); });
+      if (activeThemeSelectValue) select.value = activeThemeSelectValue;
     }
     refreshOptions();
 
     select.addEventListener('change', function () {
       var v = select.value;
-      var theme;
       if (v.indexOf('builtin:') === 0) {
         var id = v.slice(8);
-        theme = BUILTIN_THEMES.find(function (t) { return t.id === id; });
+        var entry = THEME_REGISTRY.filter(function (t) { return t.id === id; })[0];
+        var entryLabel = entry ? entry.label : id;
+        var json = getThemeState(id);
+        if (!json) { showToast('Theme "' + entryLabel + '" failed to load (missing <script> tag in index.html?)'); return; }
+        activeThemeSelectValue = v;
+        setState(json);
+        showToast('Loaded theme "' + entryLabel + '"');
       } else {
         var uid = v.slice(5);
-        theme = loadUserThemes().find(function (t) { return t.id === uid; });
-      }
-      if (theme) {
-        setState(theme.state);
-        showToast('Loaded theme "' + theme.label + '"');
+        var theme = loadUserThemes().filter(function (t) { return t.id === uid; })[0];
+        if (theme) {
+          activeThemeSelectValue = v;
+          setState(theme.state);
+          showToast('Loaded theme "' + theme.label + '"');
+        }
       }
     });
 
@@ -630,8 +678,8 @@
       var id = 'u' + Date.now();
       themes.push({ id: id, label: name, state: getState() });
       saveUserThemes(themes);
+      activeThemeSelectValue = 'user:' + id;
       refreshOptions();
-      select.value = 'user:' + id;
       showToast('Saved theme "' + name + '"');
     });
 
@@ -825,7 +873,8 @@
     resetBtn.addEventListener('click', function () {
       if (confirm('Reset styles to default?')) {
         try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-        setState(DEFAULT_STATE);
+        activeThemeSelectValue = 'builtin:' + DEFAULT_THEME_ID;
+        setState(getThemeState(DEFAULT_THEME_ID) || DEFAULT_STATE);
         showToast('Reset to defaults.');
       }
     });
@@ -892,7 +941,21 @@
     });
   }
 
-  loadSavedState();
+  // A saved editor state (this browser previously visited via ?edit and hit
+  // Save) always wins. Otherwise, layer the hardcoded default theme's data
+  // over the knob defaults -- it's already synchronously available in
+  // window.WeddingThemes by this point (see "Theme Loading" above), so
+  // there's no flash of un-themed content to guard against here; if its
+  // <script> tag is somehow missing, this just no-ops and the page keeps
+  // the knob-default styling.
+  var hasSavedState = loadSavedState();
+  if (!hasSavedState) {
+    var defaultThemeState = getThemeState(DEFAULT_THEME_ID);
+    if (defaultThemeState) {
+      deepMerge(state, migrateLegacyState(JSON.parse(JSON.stringify(defaultThemeState))));
+      activeThemeSelectValue = 'builtin:' + DEFAULT_THEME_ID;
+    }
+  }
   sanitizeState();
   applyAll();
   rebuildPanel();

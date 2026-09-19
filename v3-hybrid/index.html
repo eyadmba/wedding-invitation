@@ -194,7 +194,26 @@
   <!-- Modular Zero-Build Script Pipeline -->
   <script src="js/guests.js?v=1"></script>
   <script src="js/effects.js?v=2"></script>
-  <script src="js/style-schema.js?v=3"></script>
-  <script src="js/design-lab.js?v=1"></script>
+  <script src="js/style-schema.js?v=4"></script>
+
+  <!-- Built-in Design Lab Themes: each tag loads a themes/<id>.js file that
+       stashes its {global, cards} state into window.WeddingThemes[id] --
+       design-lab.js reads it back out synchronously (see its "Theme
+       Loading" comment). Deliberately a <script src>, not a fetch() of a
+       themes/<id>.json file: this page is meant to also open straight off
+       disk (file://), where Chromium's CORS policy blocks fetch()/XHR of a
+       local file but not loading one via <script src>. Adding a theme means
+       adding both a tag here and an entry in style-schema.js's
+       THEME_REGISTRY -- order among these tags doesn't matter, as long as
+       they're all before design-lab.js. -->
+  <script src="themes/king-hussein-club.js?v=1"></script>
+  <script src="themes/sage-gold.js?v=1"></script>
+  <script src="themes/classic-burgundy.js?v=1"></script>
+  <script src="themes/emerald-night.js?v=1"></script>
+  <script src="themes/minimal-pearl.js?v=1"></script>
+  <script src="themes/midnight-velvet.js?v=1"></script>
+  <script src="themes/forest-garnet.js?v=1"></script>
+
+  <script src="js/design-lab.js?v=2"></script>
 </body>
 </html>
