@@ -815,6 +815,41 @@ html.card-on .card{
   width:100%;
   max-width: 360px;
 }
+/* full-width row above the two answers, borrowing .rsvp-option's box so the
+   field reads as part of the same set. The [hidden] rule is load-bearing:
+   `hidden` is only a UA-stylesheet display:none, which this rule's
+   display:flex would otherwise out-specify, leaving the field visible for
+   tokenized guests. */
+.rsvp-name{
+  flex: 1 1 100%;
+  display:block;
+}
+.rsvp-name[hidden]{
+  display:none;
+}
+.rsvp-name input{
+  font-family: var(--font-body);
+  font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.15rem));
+  color: var(--rsvp-answer-color, var(--card-text-color));
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.25);
+  width:100%;
+  box-sizing:border-box;
+}
+.rsvp-name input:focus{
+  outline: 2px solid var(--accent-color);
+  outline-offset: 1px;
+}
+/* a hint, not a value: lightened off the field's own text color (rather
+   than a separate grey) so it tracks whatever the theme sets, and kept
+   above the ~0.54 alpha where it would start failing as placeholder text. */
+.rsvp-name input::placeholder{
+  color: currentColor;
+  opacity: 0.6;
+}
+
 .rsvp-option{
   flex: 1 1 0;
   min-width: 0;
@@ -854,6 +889,25 @@ html.card-on .card{
 }
 .rsvp-submit:hover{
   opacity:0.9;
+}
+.rsvp-submit:disabled{
+  opacity:0.65;
+  cursor: default;
+}
+/* js/rsvp.js writes the text and a data-state. Holds one line's height at
+   all times so the card doesn't jump when the result appears; the error
+   state is the only one that departs from the card's text color, since
+   "couldn't send" is the one message that has to be read. */
+.rsvp-status{
+  margin: -4px 0 0;
+  min-height: 1.4em;
+  font-family: var(--font-body);
+  font-size: calc(var(--text-scale, 1) * clamp(0.95rem, 3vw, 1.1rem));
+  color: var(--rsvp-answer-color, var(--card-text-color));
+  text-align:center;
+}
+.rsvp-status[data-state="error"]{
+  color: #8c1c1c;
 }
 
 /* ---- widen up from phone: restore the more generous desktop paddings

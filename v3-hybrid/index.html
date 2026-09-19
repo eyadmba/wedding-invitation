@@ -16,7 +16,7 @@
        whatever it already cached for that exact URL. Bump the number for
        whichever file you just edited (only that one needs it) to force a
        fresh fetch on next load. -->
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
@@ -169,7 +169,21 @@
 
         <p class="lead">يسعدنا تأكيد حضوركم قبل موعد الحفل</p>
 
-        <form class="rsvp-form" onsubmit="event.preventDefault(); alert('شكراً لكم! تم استلام تأكيد حضوركم.');">
+        <!-- submit handling lives in js/rsvp.js (posts to the Apps Script
+             web app); no action/onsubmit here on purpose. -->
+        <form class="rsvp-form">
+          <!-- only for guests arriving without a recognized ?g= token, where
+               nothing on the page knows who they are. js/rsvp.js unhides it
+               and marks it required in that case; for a tokenized invite it
+               stays hidden and the name comes from js/guests.js instead. -->
+          <div class="rsvp-name" hidden>
+            <!-- the hint lives in the placeholder, so aria-label carries the
+                 accessible name a visible label would have provided (a
+                 placeholder alone isn't one, and it's gone the moment they
+                 start typing). -->
+            <input type="text" name="guestName" placeholder="الاسم الكريم"
+                   aria-label="الاسم الكريم" autocomplete="name" enterkeyhint="done">
+          </div>
           <label class="rsvp-option">
             <input type="radio" name="attendance" value="yes" checked>
             <span>نعم</span>
@@ -180,6 +194,10 @@
           </label>
           <button type="submit" class="rsvp-submit">إرسال</button>
         </form>
+
+        <!-- filled by js/rsvp.js; aria-live so the sent/failed result is
+             announced rather than only seen. -->
+        <p class="rsvp-status" role="status" aria-live="polite"></p>
 
         <div class="ornament">
           <span class="line"></span>
@@ -192,7 +210,8 @@
   </main>
 
   <!-- Modular Zero-Build Script Pipeline -->
-  <script src="js/guests.js?v=1"></script>
+  <script src="js/guests.js?v=3"></script>
+  <script src="js/rsvp.js?v=2"></script>
   <script src="js/effects.js?v=2"></script>
   <script src="js/style-schema.js?v=4"></script>
 

@@ -35,7 +35,7 @@
     "displayFont": "'Aref Ruqaa', serif",
     "bodyFont": "'Amiri', serif",
     "textScale": 100,
-    "cardTitleSize": 138,
+    "cardTitleSize": 180,
     "textShadowBlur": 2,
     "textShadowOpacity": 25,
     "ornamentMark": "star",
@@ -61,7 +61,7 @@
           "hex": "#520000",
           "alpha": 100
         },
-        "kickerScale": 100,
+        "kickerScale": 150,
         "verseColor": {
           "hex": "#520000",
           "alpha": 100
@@ -71,7 +71,7 @@
           "hex": "#520000",
           "alpha": 100
         },
-        "namesScale": 100,
+        "namesScale": 130,
         "fathersColor": {
           "hex": "#520000",
           "alpha": 100

@@ -213,6 +213,23 @@
     (function personalizeForGuest(){
       const token = (new URLSearchParams(location.search).get('g') || '').toLowerCase();
       const guest = GUESTS[token];
+
+      /* published for js/rsvp.js, which sends the token + name to the
+         sheet: re-deriving them there would mean a second copy of the ?g=
+         parsing and a second GUESTS lookup, free to drift out of step with
+         the personalization actually on screen. Set before the early
+         return below, so an unknown/missing token still submits -- it just
+         lands in the sheet with blank Token, which is how an RSVP off a
+         generic (untokenized) link identifies itself. `known` is what
+         js/rsvp.js keys its name field off: false means nothing here
+         identifies the guest, so the form has to ask them directly. */
+      window.WeddingGuest = {
+        known: !!guest,
+        token: token,
+        name: guest ? guest.name : '',
+        seats: guest ? guest.seats : null
+      };
+
       if (!guest) return;
 
       const kicker = document.getElementById('kickerText');
