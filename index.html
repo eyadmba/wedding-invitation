@@ -91,12 +91,20 @@
           <span class="line"></span>
         </div>
 
-        <p class="hero-date">السبت ٣ تشرين الأول  ٢٠٢٦ — الساعة السابعة مساءً </p>
+        <p class="hero-date">
+          السبت ٣ تشرين الأول  ٢٠٢٦ — الساعة السابعة مساءً 
+          <br/>
+          نادي الملك حسين — الدوار الأول
+        </p>
       </div>
 
       <div class="footer-info">
-        <span>عدد المقاعد: <span id="seatCount">٢</span></span>
+        <!-- the no-token default: a generic link can't know a seat count, so
+             it states the limit qualitatively. js/guests.js overwrites the
+             whole line with "عدد المقاعد: N" only when a ?g= token resolves
+             to a guest with a real number. -->
         <span>أمسيتنا للكبار فقط؛ شاكرين لكم تفهّمكم</span>
+        <span id="seatInfo">عدد المقاعد محدود</span>
       </div>
     </section>
 
@@ -140,14 +148,14 @@
         <div class="locations">
           <div class="location-card">
             <div class="location-head">
-              <h3>بيت العروس</h3>
+              <h3>زفة بيت العروس</h3>
               <span class="location-time">٧:٠٠ مساءً</span>
             </div>
             <iframe loading="lazy" title="خريطة بيت العروس" src="https://www.google.com/maps?q=31.965863,35.847342&z=16&output=embed"></iframe>
           </div>
           <div class="location-card">
             <div class="location-head">
-              <h3>نادي الملك حسين</h3>
+              <h3>الحفل في نادي الملك حسين</h3>
               <span class="location-time">٨:٠٠ مساءً</span>
             </div>
             <iframe loading="lazy" title="خريطة نادي الملك حسين" src="https://www.google.com/maps?q=31.950986864551023,35.921994920492764&z=16&output=embed"></iframe>
@@ -210,7 +218,7 @@
   </main>
 
   <!-- Modular Zero-Build Script Pipeline -->
-  <script src="js/guests.js?v=3"></script>
+  <script src="js/guests.js?v=4"></script>
   <script src="js/rsvp.js?v=2"></script>
   <script src="js/effects.js?v=2"></script>
   <script src="js/style-schema.js?v=4"></script>

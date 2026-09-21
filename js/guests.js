@@ -232,12 +232,20 @@
 
       if (!guest) return;
 
+      /* guarded on a non-empty name, not just on the token resolving: most
+         GUESTS entries still carry name: '', and concatenating one of those
+         produced a bare "دعوة " -- worse than the generic line it replaced.
+         An unnamed token now keeps the HTML's "دعوة لمن نحب". */
       const kicker = document.getElementById('kickerText');
-      if (kicker) kicker.textContent = 'دعوة ' + guest.name;
+      if (kicker && guest.name) kicker.textContent = 'دعوة ' + guest.name;
 
-      const seatCount = document.getElementById('seatCount');
-      if (seatCount && Number.isFinite(guest.seats)) {
+      /* the element holds the whole sentence, so the two phrasings stay
+         whole strings rather than a shared prefix with a swapped-in number:
+         "عدد المقاعد محدود" has no number to slot in at all. */
+      const seatInfo = document.getElementById('seatInfo');
+      if (seatInfo && Number.isFinite(guest.seats)) {
         const easternDigits = '٠١٢٣٤٥٦٧٨٩';
-        seatCount.textContent = String(guest.seats).replace(/[0-9]/g, d => easternDigits[d]);
+        const seats = String(guest.seats).replace(/[0-9]/g, d => easternDigits[d]);
+        seatInfo.textContent = 'عدد المقاعد: ' + seats;
       }
     })();
