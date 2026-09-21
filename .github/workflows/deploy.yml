@@ -26,12 +26,16 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
-          cp index.html _site/
-          cp -r assets _site/
+          # the live site is no longer a single self-contained file: it's
+          # index.html + styles.css + the js/ and themes/ script folders it
+          # loads by <script src>. Miss one here and the page still deploys,
+          # just unstyled or with no themes.
+          cp index.html styles.css _site/
+          cp -r assets js themes _site/
           echo 'wedding.eyadarafat.com' > _site/CNAME
 
-          # Any top-level v<N>* folder (v3, v2-claude, v3-hybrid, ...) with its
-          # own index.html is a test site. It gets published under
+          # Any top-level v<N>* folder (v0-draft, v2-claude, ...) with its own
+          # index.html is a test site. It gets published under
           # /staging/<folder>/ automatically -- no workflow changes needed
           # when adding new ones.
           mkdir -p _site/staging
@@ -41,6 +45,13 @@ jobs:
             if [ -f "$dir/index.html" ]; then
               echo "Staging test site: $dir -> /staging/$dir/"
               cp -r "$dir" "_site/staging/$dir"
+              # drafts reference assets/... relatively, but only some keep
+              # their own copy. Without this, a draft that relied on the
+              # repo-root assets/ (as it does when opened from disk) loses
+              # every image once it's served from /staging/<dir>/.
+              if [ ! -d "$dir/assets" ]; then
+                cp -r assets "_site/staging/$dir/assets"
+              fi
             fi
           done
 
