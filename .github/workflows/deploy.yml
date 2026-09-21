@@ -55,6 +55,22 @@ jobs:
             fi
           done
 
+          # Rewrite every ?v=... cache-busting query string to this commit's
+          # SHA, in the deployed copy only -- the files in git keep their
+          # hand-written ?v=N, which is what makes local file:// editing work.
+          #
+          # Hand-bumping those numbers per edit is the part that fails in
+          # practice: miss one and a phone keeps the stylesheet it cached
+          # days ago, with no easy way to clear it. Keying them to the SHA
+          # means every push produces URLs the device has provably never
+          # seen, so CSS and JS can't be stale once index.html is fetched.
+          # (Only local ?v= strings match -- the Google Fonts URL uses
+          # ?family=, so it's untouched.)
+          SHA="${GITHUB_SHA::12}"
+          echo "Stamping asset URLs with build $SHA"
+          find _site -name '*.html' -print0 \
+            | xargs -0 sed -i -E "s/\?v=[A-Za-z0-9]+/?v=$SHA/g"
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3

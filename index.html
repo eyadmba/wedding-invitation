@@ -13,9 +13,14 @@
   <!-- ?v=N cache-busting query strings below: plain <script src> URLs with
        no build step have nothing else to make the browser (or a static
        host's CDN) re-fetch an edited file -- it'll happily keep serving
-       whatever it already cached for that exact URL. Bump the number for
-       whichever file you just edited (only that one needs it) to force a
-       fresh fetch on next load. -->
+       whatever it already cached for that exact URL.
+
+       On deploy these are ALL rewritten to the commit SHA (see the
+       "Stamping asset URLs" step in .github/workflows/deploy.yml), so the
+       published site never depends on anyone remembering to bump them --
+       every push yields URLs no device has seen before. The numbers here
+       only matter when opening this file straight off disk; bump the one
+       you just edited if a local reload shows stale CSS or JS. -->
   <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
