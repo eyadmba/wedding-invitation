@@ -404,19 +404,27 @@ body{
     rgba(0, 0, 0, calc(var(--text-shadow-opacity) * 0.65));
 }
 
+/* Sections size to their content, with the padding below as the only
+   source of space between them -- so the gap between two cards can never
+   exceed one section's bottom padding plus the next one's top padding.
+
+   They used to be min-height: min(100lvh, 900px) with the card centred in
+   that box, which meant the leftover space *was* the gap: a 480px card on
+   an 850px-tall phone screen pushed the next card ~370px away, and the
+   shorter the card the wider the gap grew. Only #hero keeps a viewport
+   min-height now (it's the landing screen, and .footer-info is pinned to
+   its bottom edge); nothing here scroll-snaps, so the full-height boxes
+   were never doing anything but spacing. */
 .page{
   position:relative;
-  /* lvh (large viewport height), not dvh -- see effects.js/design-lab.js
-     comments for the full "address bar" rationale; short version: lvh is
-     pinned and doesn't animate, so the page's scrollable length never
-     shifts mid-scroll. Capped with min() at 900px on very tall viewports. */
-  min-height: min(100lvh, 900px);
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding: 48px 20px;
+  /* the ceiling: 72px + 72px between adjacent cards at the very most,
+     tightening to 40px each on short screens. */
+  padding: clamp(40px, 6vh, 72px) 20px;
   gap: 24px;
 }
 
@@ -454,7 +462,6 @@ html.card-on .card{
 }
 
 #hero{
-  position: relative; /* anchors .footer-info below */
   padding-left: 10px;
   padding-right: 10px;
   /* svh, not the shared .page lvh: .footer-info is pinned near the
@@ -465,7 +472,7 @@ html.card-on .card{
      bar state, so if the hero fits within it, it's on-screen immediately. */
   min-height: min(100svh, 900px);
   padding-top: clamp(24px, 4.5vh, 44px);
-  padding-bottom: clamp(68px, 9.5vh, 88px);
+  padding-bottom: clamp(40px, 7vh, 64px);
 }
 #hero .card{
   gap: clamp(16px, 2.8vh, 26px);
@@ -696,21 +703,27 @@ html.card-on .card{
   color: var(--hero-date-color);
 }
 
+/* in normal flow as #hero's last child, not pinned to the bottom of the
+   viewport. Pinned, it was measured from the viewport edge while the card
+   was measured from the middle, so on a short screen the two closed in on
+   each other independently of the card's own height -- and the hero needed
+   a big padding-bottom reserved purely to keep them apart. Flowing under
+   the card, the spacing is just the section's flex gap plus the margin
+   below, which holds at any height. */
 .footer-info{
-  position:absolute;
-  bottom: 14px;
-  left: 24px;
-  right: 24px;
+  margin-top: clamp(6px, 2vh, 18px);
+  max-width: 100%;
   display:flex;
   flex-direction: column;
   align-items:center;
-  justify-content:space-between;
+  justify-content:center;
   gap: 6px;
   font-family: var(--font-body);
   font-size: calc(var(--footer-scale, 1) * clamp(0.85rem, 3.2vw, 1.05rem));
   color: var(--footer-color);
-  /* sits outside the card, directly over the background photo, so the
-     shared --hero-glow alone isn't enough separation at small sizes: a
+  /* sits outside the card, directly over the background photo (no card
+     tint behind it), so the shared --hero-glow alone isn't enough
+     separation at these small sizes: a
      tight dark halo (four 1px offsets + a soft blur) is layered under it
      so the light beige text stays legible over any part of the photo.
      Fixed, not driven by the design-lab blur/opacity knobs -- those still
@@ -961,7 +974,7 @@ html.card-on .card{
    the mobile-first base above intentionally trims down. ---- */
 @media (min-width: 481px){
   .page{
-    padding: 64px 28px;
+    padding: clamp(56px, 7vh, 80px) 28px;
     gap: 28px;
   }
   .card{
@@ -979,7 +992,7 @@ html.card-on .card{
   }
   .footer-info{
     flex-direction: row;
-    bottom: 22px;
+    gap: 22px;
   }
   .timeline{ gap: 40px; }
   .timeline-item:nth-child(odd){ padding-right: calc(50% + 32px); }
