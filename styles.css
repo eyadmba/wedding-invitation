@@ -27,6 +27,13 @@
   --card-blur: 0px;
   --font-display: 'Aref Ruqaa', serif;
   --font-body: 'Amiri', serif;
+  /* No letter-spacing anywhere in this file, deliberately. Every string on
+     the page is Arabic, and Arabic is a connected script: letter-spacing
+     adds its track between *every* glyph pair, including letters that are
+     supposed to be joined, so it pries the cursive joins apart and leaves
+     each letter's dots visually stranded between the letter they belong to
+     and the next one. It's a Latin device with no Arabic equivalent --
+     word-spacing is the safe knob if a line ever needs opening up. */
 
   --sky: color-mix(in srgb, var(--bg-color-solid) 100%, white 10%);
   --sky-deep: var(--bg-color-solid);
@@ -229,7 +236,6 @@ html.envelope-locked, html.envelope-locked body{
   font-family: var(--font-body);
   font-size: clamp(0.85rem, 3vw, 1rem);
   color: rgba(58,47,39,0.55);
-  letter-spacing: 0.05em;
   animation: hint-pulse 2.4s ease-in-out infinite;
   pointer-events: none;
 }
@@ -537,7 +543,6 @@ html.card-on .card{
   margin: -10px 0 0;
   font-family: var(--font-display);
   font-size: calc(var(--kicker-scale, 1) * clamp(1.5rem, 5.5vw, 2.2rem));
-  letter-spacing: 0.05em;
   color: var(--kicker-color);
   text-shadow: var(--hero-glow);
 }
@@ -565,7 +570,6 @@ html.card-on .card{
 .lead{
   margin:0;
   font-family: var(--font-body);
-  letter-spacing: 0.02em;
 }
 #hero .lead{
   color: var(--hero-secondary);
@@ -690,7 +694,6 @@ html.card-on .card{
   font-family: var(--font-body);
   font-size: calc(var(--hero-date-scale, 1) * clamp(0.85rem, 2.6vw, 1rem));
   color: var(--hero-date-color);
-  letter-spacing: 0.01em;
 }
 
 .footer-info{
@@ -706,7 +709,6 @@ html.card-on .card{
   font-family: var(--font-body);
   font-size: calc(var(--footer-scale, 1) * clamp(0.85rem, 3.2vw, 1.05rem));
   color: var(--footer-color);
-  letter-spacing: 0.01em;
   /* sits outside the card, directly over the background photo, so the
      shared --hero-glow alone isn't enough separation at small sizes: a
      tight dark halo (four 1px offsets + a soft blur) is layered under it
@@ -931,7 +933,6 @@ html.card-on .card{
   border-radius: 10px;
   padding: 16px;
   cursor:pointer;
-  letter-spacing: 0.03em;
 }
 .rsvp-submit:hover{
   opacity:0.9;
