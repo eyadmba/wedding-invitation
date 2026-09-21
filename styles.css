@@ -25,6 +25,36 @@
 
   --card-bg: rgba(0,0,0,0);
   --card-blur: 0px;
+  /* ---- fluid type scale ----
+     One ramp, six steps, every step fluid between a 360px and a 1280px
+     viewport (the Utopia method: utopia.fyi -- itself the descendant of
+     Mike Riethmuller's 2016 "CSS locks"). Ratio is ~1.15 at the small end
+     widening to ~1.20 at the large end, so headings grow faster than body
+     text as there's room for them.
+
+     The point is that no rule below picks its own numbers. Before this
+     there were 19 distinct clamp() triples across 21 declarations -- sets
+     like (1rem, 3vw, 1.15rem) and (0.95rem, 3vw, 1.15rem) that differ by
+     noise rather than intent, with nowhere to turn a single knob. Retune
+     the page by editing the two ends of a step here, not by hunting
+     through the rules.
+
+     min/max are in rem, deliberately: a bare vw font-size ignores browser
+     zoom and the user's default font size (WCAG 1.4.4). The middle term is
+     what interpolates; the rem ends are what keep it accessible. */
+  --step--1: clamp(0.87rem, 0.819rem + 0.23vw, 1.00rem);
+  --step-0:  clamp(1.00rem, 0.922rem + 0.35vw, 1.20rem);
+  --step-1:  clamp(1.15rem, 1.037rem + 0.50vw, 1.44rem);
+  --step-2:  clamp(1.32rem, 1.160rem + 0.71vw, 1.73rem);
+  --step-3:  clamp(1.52rem, 1.305rem + 0.96vw, 2.07rem);
+  --step-4:  clamp(1.75rem, 1.460rem + 1.29vw, 2.49rem);
+
+  /* Off the ramp on purpose -- display type, not text. It reaches its
+     ceiling by ~720px instead of 1280px, because the couple's names are
+     meant to fill the card's width on a phone rather than track the
+     paragraph sizes around them. Steepness is the whole effect. */
+  --step-display: clamp(2.8rem, 11.5vw, 5.2rem);
+
   --font-display: 'Aref Ruqaa', serif;
   --font-body: 'Amiri', serif;
   /* No letter-spacing anywhere in this file, deliberately. Every string on
@@ -234,7 +264,7 @@ html.envelope-locked, html.envelope-locked body{
   bottom: 8%;
   transform: translateX(-50%);
   font-family: var(--font-body);
-  font-size: clamp(0.85rem, 3vw, 1rem);
+  font-size: var(--step--1);
   color: rgba(58,47,39,0.55);
   animation: hint-pulse 2.4s ease-in-out infinite;
   pointer-events: none;
@@ -520,7 +550,7 @@ html.card-on .card{
 .section-title{
   margin: -10px 0 8px;
   font-family: var(--font-display);
-  font-size: calc(var(--card-title-scale, 1) * clamp(1.7rem, 6vw, 2.6rem));
+  font-size: calc(var(--card-title-scale, 1) * var(--step-4));
   line-height: 1.2;
   color: var(--card-title-color);
 }
@@ -540,7 +570,7 @@ html.card-on .card{
      that spacing. */
   margin: -8px 0 -12px;
   font-family: var(--bismillah-font);
-  font-size: calc(var(--bismillah-scale, 1) * clamp(0.85rem, 3vw, 1rem));
+  font-size: calc(var(--bismillah-scale, 1) * var(--step--1));
   font-weight:700;
   color: var(--bismillah-color);
   text-shadow: var(--hero-glow);
@@ -549,7 +579,7 @@ html.card-on .card{
 .kicker{
   margin: -10px 0 0;
   font-family: var(--font-display);
-  font-size: calc(var(--kicker-scale, 1) * clamp(1.5rem, 5.5vw, 2.2rem));
+  font-size: calc(var(--kicker-scale, 1) * var(--step-3));
   color: var(--kicker-color);
   text-shadow: var(--hero-glow);
 }
@@ -563,7 +593,7 @@ html.card-on .card{
 .verse{
   margin:0;
   font-family: var(--font-body);
-  font-size: calc(var(--verse-scale, 1) * clamp(0.9rem, 2.8vw, 1.15rem));
+  font-size: calc(var(--verse-scale, 1) * var(--step-0));
   line-height: 1.65;
   color: var(--verse-color);
   text-shadow: var(--hero-glow);
@@ -580,11 +610,11 @@ html.card-on .card{
 }
 #hero .lead{
   color: var(--hero-secondary);
-  font-size: calc(var(--hero-secondary-scale, 1) * clamp(1rem, 2.6vw, 1.3rem));
+  font-size: calc(var(--hero-secondary-scale, 1) * var(--step-1));
 }
 #rsvp-section .lead{
   color: var(--rsvp-question-color, var(--card-title-color));
-  font-size: calc(var(--text-scale, 1) * clamp(1.05rem, 2.6vw, 1.3rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-1));
 }
 
 .row{
@@ -599,6 +629,11 @@ html.card-on .card{
   margin: -12px 0 -10px;
   column-gap: clamp(4px, 1.8vw, 16px);
 }
+/* the only text on the page that opts out of the scale. These are two
+   long Arabic names on one white-space:nowrap line, so the size is driven
+   by "must fit the card's width", not by a typographic step -- hence the
+   unusually steep 4.4vw and the very low 0.78rem floor. Snapping it to a
+   step would wrap or overflow it on a narrow phone. */
 .fathers .father{
   font-family: var(--font-body);
   font-weight:700;
@@ -612,7 +647,7 @@ html.card-on .card{
    accent color for either connector, just its own row's color). */
 .fathers .conn{
   font-family: var(--font-body);
-  font-size: calc(var(--fathers-scale, 1) * clamp(1rem, 2.4vw, 1.2rem));
+  font-size: calc(var(--fathers-scale, 1) * var(--step-0));
   color: var(--fathers-color);
   text-shadow: var(--hero-glow);
 }
@@ -623,7 +658,7 @@ html.card-on .card{
 .names .name{
   font-family: var(--font-display);
   font-weight:700;
-  font-size: calc(var(--names-scale, 1) * clamp(2.8rem, 11.5vw, 5.2rem));
+  font-size: calc(var(--names-scale, 1) * var(--step-display));
   line-height:1;
   /* kept as the fallback paint: a browser without background-clip:text
      ignores the gradient block below and still renders solid maroon,
@@ -684,7 +719,7 @@ html.card-on .card{
    names either side of it, same as .fathers .conn above. */
 .names .conn{
   font-family: var(--font-body);
-  font-size: calc(var(--names-scale, 1) * clamp(1.5rem, 4.8vw, 2.3rem));
+  font-size: calc(var(--names-scale, 1) * var(--step-3));
   color: var(--names-color);
   text-shadow: var(--hero-glow);
   padding: 0 2px;
@@ -699,7 +734,7 @@ html.card-on .card{
 .hero-date{
   margin: -6px 0 0;
   font-family: var(--font-body);
-  font-size: calc(var(--hero-date-scale, 1) * clamp(0.85rem, 2.6vw, 1rem));
+  font-size: calc(var(--hero-date-scale, 1) * var(--step--1));
   color: var(--hero-date-color);
 }
 
@@ -719,7 +754,7 @@ html.card-on .card{
   justify-content:center;
   gap: 6px;
   font-family: var(--font-body);
-  font-size: calc(var(--footer-scale, 1) * clamp(0.85rem, 3.2vw, 1.05rem));
+  font-size: calc(var(--footer-scale, 1) * var(--step--1));
   color: var(--footer-color);
   /* sits outside the card, directly over the background photo (no card
      tint behind it), so the shared --hero-glow alone isn't enough
@@ -810,13 +845,13 @@ html.card-on .card{
   display:block;
   font-family: var(--font-body);
   font-weight:700;
-  font-size: calc(var(--text-scale, 1) * clamp(1.1rem, 4vw, 1.5rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-1));
   color: var(--timeline-hour-color, var(--card-text-color));
 }
 .timeline-label{
   display:block;
   font-family: var(--font-body);
-  font-size: calc(var(--text-scale, 1) * clamp(0.95rem, 3vw, 1.15rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-0));
   color: var(--timeline-label-color, var(--card-text-color));
   margin-top: 2px;
 }
@@ -847,13 +882,13 @@ html.card-on .card{
   margin:0;
   font-family: var(--font-body);
   font-weight:700;
-  font-size: calc(var(--text-scale, 1) * clamp(1.05rem, 3.4vw, 1.3rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-1));
   color: var(--location-venue-color, var(--card-title-color));
 }
 .location-card .location-time{
   font-family: var(--font-body);
   font-weight:700;
-  font-size: calc(var(--text-scale, 1) * clamp(0.85rem, 2.8vw, 1.05rem));
+  font-size: calc(var(--text-scale, 1) * var(--step--1));
   color: var(--location-time-color, var(--card-text-color));
   white-space: nowrap;
 }
@@ -890,7 +925,7 @@ html.card-on .card{
 }
 .rsvp-name input{
   font-family: var(--font-body);
-  font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.15rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-0));
   color: var(--rsvp-answer-color, var(--card-text-color));
   border: 1px solid var(--hairline);
   border-radius: 10px;
@@ -919,7 +954,7 @@ html.card-on .card{
   justify-content:center;
   gap: 10px;
   font-family: var(--font-body);
-  font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.15rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-0));
   color: var(--rsvp-answer-color, var(--card-text-color));
   border: 1px solid var(--hairline);
   border-radius: 10px;
@@ -939,7 +974,7 @@ html.card-on .card{
   margin-top: 6px;
   font-family: var(--font-body);
   font-weight:700;
-  font-size: calc(var(--text-scale, 1) * clamp(1rem, 3vw, 1.1rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-0));
   background: var(--button-color);
   color: var(--button-text-color);
   border:none;
@@ -962,7 +997,7 @@ html.card-on .card{
   margin: -4px 0 0;
   min-height: 1.4em;
   font-family: var(--font-body);
-  font-size: calc(var(--text-scale, 1) * clamp(0.95rem, 3vw, 1.1rem));
+  font-size: calc(var(--text-scale, 1) * var(--step-0));
   color: var(--rsvp-answer-color, var(--card-text-color));
   text-align:center;
 }
