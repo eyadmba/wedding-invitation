@@ -543,12 +543,14 @@ html.card-on .card{
 }
 
 /* the hero's Quran verse line, ported from the theme1 reference -- own
-   color/scale like every other distinct hero string, Tajawal rather than
-   --font-body since the reference uses it specifically for this line
-   regardless of whatever body font is picked for the rest of the page. */
+   color/scale like every other distinct hero string, but on --font-body
+   rather than the reference's hardcoded Tajawal: a geometric sans set
+   against Amiri's naskh everywhere else made the verse read as pasted in
+   from another document, and following the var means it tracks whatever
+   body font the design lab is set to. */
 .verse{
   margin:0;
-  font-family: 'Tajawal', sans-serif;
+  font-family: var(--font-body);
   font-size: calc(var(--verse-scale, 1) * clamp(0.9rem, 2.8vw, 1.15rem));
   line-height: 1.65;
   color: var(--verse-color);
@@ -612,18 +614,60 @@ html.card-on .card{
   font-weight:700;
   font-size: calc(var(--names-scale, 1) * clamp(2.8rem, 11.5vw, 5.2rem));
   line-height:1;
+  /* kept as the fallback paint: a browser without background-clip:text
+     ignores the gradient block below and still renders solid maroon,
+     rather than transparent (invisible) names. */
   color: var(--names-color);
-  /* two stacked shadows, not one: the fixed highlight below is this
-     element's own look (unrelated to the design-lab blur/opacity knobs) --
-     layering the .wrap shadow alongside it, instead of replacing it, keeps
-     that highlight intact at blur/opacity 0. */
-  text-shadow:
-    0 1px 0 rgba(255,255,255,0.5),
+
+  /* These two lines are what make the gradient safe on this font, and
+     removing them silently eats glyphs. A clipped-to-text background is
+     only painted inside the element's own box, and .row is a grid, so each
+     name is a block box exactly line-height (1em) tall -- while Aref
+     Ruqaa's ink runs well past that, most visibly the Arabic dots sitting
+     below the baseline. Anything outside the box gets no gradient painted
+     into it and, with the fill transparent, simply disappears. The padding
+     grows the painting area; the equal negative margin hands the space
+     back so the row's spacing is unchanged. */
+  padding: 0.35em 0;
+  margin: -0.35em 0;
+
+  /* mixed *from* --names-color rather than between two literal hex values:
+     the design lab lets the couple's color be changed per theme, and a
+     hardcoded maroon ramp would detach from it the moment anyone touched
+     that control.
+
+     The top mixes toward --ornament-color, not toward white. On a near-
+     black maroon (#520000) a white mix shifts the color barely a dozen RGB
+     points before it starts desaturating into a chalky rose -- invisible
+     as a gradient and wrong in tone. Mixing toward the theme's ornament
+     gold travels somewhere warm instead, so the lift actually reads, and
+     it ties the names to the ✦ marks and hairlines already using that var.
+
+     Stops sit at 18%/82%, not 0%/100%: the padding above made the box
+     taller than the glyphs, so the ends of the ramp would land in that
+     padding and never show on the ink. */
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--names-color) 100%, var(--ornament-color) 34%) 18%,
+    var(--names-color) 52%,
+    color-mix(in srgb, var(--names-color) 100%, black 28%) 82%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  /* text-shadow can't coexist with clipped-to-text paint: the shadow is
+     cast by the glyph silhouette and the glyph is now transparent, so it
+     shows straight through the letters as a grey smear. The inherited
+     .wrap shadow is switched off here and the depth re-applied as a
+     filter, which acts on the composited (gradient-filled) result instead.
+     Still driven by the design-lab blur/opacity knobs, so those sliders
+     keep working on the names. */
+  text-shadow: none;
+  filter: drop-shadow(
     0
-    calc(var(--text-shadow-blur) * 0.3px)
-    calc(var(--text-shadow-blur) * 1.2px)
-    rgba(0, 0, 0, calc(var(--text-shadow-opacity) * 0.65)),
-    var(--hero-glow);
+    calc(var(--text-shadow-blur) * 0.4px)
+    calc(var(--text-shadow-blur) * 1.1px)
+    rgba(60, 0, 0, calc(var(--text-shadow-opacity) * 0.55)));
 }
 /* the "و" between bride & groom -- follows --names-color like the two
    names either side of it, same as .fathers .conn above. */
@@ -638,10 +682,12 @@ html.card-on .card{
 /* the hero's own date/time line, ported from the theme1 reference --
    sits inside the card itself (after the closing ornament), separate
    from .footer-info below (the seat-count notice, absolutely
-   positioned at the bottom of the *section*, outside the card). */
+   positioned at the bottom of the *section*, outside the card). On
+   --font-body for the same reason as .verse above: these two were the
+   last holdouts still hardcoding the reference's Tajawal. */
 .hero-date{
   margin: -6px 0 0;
-  font-family: 'Tajawal', sans-serif;
+  font-family: var(--font-body);
   font-size: calc(var(--hero-date-scale, 1) * clamp(0.85rem, 2.6vw, 1rem));
   color: var(--hero-date-color);
   letter-spacing: 0.01em;

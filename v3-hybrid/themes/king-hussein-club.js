@@ -17,7 +17,7 @@
       "alpha": 100
     },
     "cardTextColor": {
-      "hex": "#520000",
+      "hex": "#650003",
       "alpha": 100
     },
     "buttonColor": {
@@ -29,7 +29,7 @@
       "alpha": 100
     },
     "ornamentColor": {
-      "hex": "#fff7c2",
+      "hex": "#b18139",
       "alpha": 100
     },
     "displayFont": "'Aref Ruqaa', serif",
@@ -43,8 +43,8 @@
     "leafColor": "#b77676",
     "petalColor": "#fff7c2",
     "cardBackgroundEnabled": true,
-    "cardColor": "#b17f07",
-    "cardAlpha": 5,
+    "cardColor": "#f7e7ca",
+    "cardAlpha": 82,
     "cardBlurEnabled": true,
     "cardBlurAmount": 9
   },
@@ -53,7 +53,7 @@
       "values": {
         "bismillahFont": "'Aref Ruqaa', serif",
         "bismillahColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "bismillahScale": 100,
@@ -63,35 +63,35 @@
         },
         "kickerScale": 150,
         "verseColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "verseScale": 100,
         "couplesColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "namesScale": 130,
         "fathersColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "fathersScale": 100,
         "heroSecondaryColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "heroSecondaryScale": 100,
         "heroDateColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "heroDateScale": 100,
         "footerColor": {
-          "hex": "#fff7c2",
+          "hex": "#fff1db",
           "alpha": 100
         },
-        "footerScale": 100
+        "footerScale": 142
       },
       "overrides": {}
     },
@@ -110,11 +110,11 @@
           "alpha": 100
         },
         "hourTextColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "labelTextColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         }
       },
@@ -131,11 +131,11 @@
           "alpha": 100
         },
         "venueNameColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "venueTimeColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         }
       },
@@ -152,11 +152,11 @@
           "alpha": 100
         },
         "questionColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         },
         "answerColor": {
-          "hex": "#520000",
+          "hex": "#650003",
           "alpha": 100
         }
       },
