@@ -76,7 +76,7 @@
           "hex": "#650003",
           "alpha": 100
         },
-        "fathersScale": 100,
+        "fathersScale": 130,
         "heroSecondaryColor": {
           "hex": "#650003",
           "alpha": 100
